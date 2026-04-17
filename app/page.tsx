@@ -6,6 +6,7 @@ import { ModelsCarousel } from "@/components/ModelsCarousel";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
 import { StatsBar } from "@/components/StatsBar";
+import { VideoShowcase } from "@/components/VideoShowcase";
 import { fetchEditorial, fetchRoster } from "@/lib/data";
 
 export default async function HomePage() {
@@ -13,12 +14,17 @@ export default async function HomePage() {
     fetchRoster(),
     fetchEditorial(),
   ]);
+  const filmItems = editorial.filter(
+    (e) => typeof e.video_url === "string" && e.video_url.length > 0
+  );
 
   return (
     <>
       <SiteNav />
       <HeroSection />
       <StatsBar />
+
+      <VideoShowcase items={filmItems} />
 
       <section className="section" id="models">
         <div

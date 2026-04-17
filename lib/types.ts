@@ -10,6 +10,8 @@ export type EditorialItem = {
   id?: string;
   title: string;
   image_url: string;
+  /** Optional campaign video (e.g. Cloudinary URL). */
+  video_url?: string | null;
   sort_order?: number;
 };
 

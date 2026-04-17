@@ -14,8 +14,9 @@ export default async function AdminEditorialPage() {
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Recent campaigns</h1>
       <p className={styles.adminSubtitle}>
-        Editorial grid on the homepage. Images upload to Cloudinary (
-        <code style={{ color: "#c9a84c" }}>onyxx/editorial</code>).
+        Editorial grid and film section on the homepage. Images and optional videos upload to
+        Cloudinary (<code style={{ color: "#c9a84c" }}>onyxx/editorial</code>). Videos also
+        appear in the <strong>Film &amp; Campaign</strong> block when set.
       </p>
 
       <div className={styles.card}>
@@ -62,6 +63,18 @@ export default async function AdminEditorialPage() {
               />
             </div>
             <div>
+              <label className={styles.label} htmlFor="ed-video">
+                Video (optional)
+              </label>
+              <input
+                id="ed-video"
+                name="video"
+                type="file"
+                accept="video/*"
+                className={styles.file}
+              />
+            </div>
+            <div>
               <button type="submit" className={`${styles.btn} ${styles.btnGold}`}>
                 Create
               </button>
@@ -86,17 +99,31 @@ export default async function AdminEditorialPage() {
                 <tr key={id}>
                   <td>
                     <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                      {item.image_url ? (
-                        <Image
-                          src={String(item.image_url)}
-                          alt=""
-                          width={80}
-                          height={56}
-                          className={styles.thumb}
-                          style={{ width: 80, height: 56 }}
-                          unoptimized
-                        />
-                      ) : null}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                        {item.image_url ? (
+                          <Image
+                            src={String(item.image_url)}
+                            alt=""
+                            width={80}
+                            height={56}
+                            className={styles.thumb}
+                            style={{ width: 80, height: 56 }}
+                            unoptimized
+                          />
+                        ) : null}
+                        {item.video_url ? (
+                          <video
+                            src={String(item.video_url)}
+                            muted
+                            playsInline
+                            width={80}
+                            height={45}
+                            style={{ width: 80, height: 45, objectFit: "cover", borderRadius: 4 }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: "0.7rem", color: "#888" }}>No video</span>
+                        )}
+                      </div>
                       <span style={{ fontSize: "0.85rem" }}>{String(item.title)}</span>
                     </div>
                   </td>
@@ -132,6 +159,29 @@ export default async function AdminEditorialPage() {
                             className={styles.file}
                           />
                         </div>
+                        <div>
+                          <label className={styles.label}>New video (optional)</label>
+                          <input
+                            name="video"
+                            type="file"
+                            accept="video/*"
+                            className={styles.file}
+                          />
+                        </div>
+                        {item.video_url ? (
+                          <label
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
+                              fontSize: "0.8rem",
+                              color: "#aaa",
+                            }}
+                          >
+                            <input type="checkbox" name="clear_video" value="1" />
+                            Remove video
+                          </label>
+                        ) : null}
                       </div>
                       <button
                         type="submit"

@@ -50,6 +50,7 @@ export function SiteNav() {
           <a href="#models">Models</a>
           <a href="#ecosystem">Ecosystem</a>
           <a href="#data">Insights</a>
+          <a href="#film">Film</a>
           <a href="#gallery">Editorial</a>
           <a href="#apply">Apply</a>
           <button
@@ -96,6 +97,9 @@ export function SiteNav() {
         </a>
         <a href="#data" onClick={closeMobile}>
           Insights
+        </a>
+        <a href="#film" onClick={closeMobile}>
+          Film
         </a>
         <a href="#gallery" onClick={closeMobile}>
           Editorial

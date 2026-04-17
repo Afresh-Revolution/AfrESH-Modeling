@@ -983,6 +983,56 @@ img {
   font-weight: 700;
   font-size: 0.95rem;
 }
+.gallery-item video.gallery-img {
+  position: absolute;
+  inset: 0;
+}
+
+/* ===== Film / motion section ===== */
+.film-section {
+  scroll-margin-top: 5rem;
+  background: linear-gradient(
+    180deg,
+    var(--bg) 0%,
+    rgba(18, 18, 22, 0.85) 50%,
+    var(--bg) 100%
+  );
+}
+.film-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+.film-card {
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid rgba(201, 168, 76, 0.12);
+  min-width: 0;
+}
+.film-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+  background: #0a0a0c;
+  vertical-align: middle;
+}
+.film-card-caption {
+  padding: 1rem 1.25rem;
+  font-family: var(--font-nunito), sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--fg);
+}
+.film-empty {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: var(--fg-muted);
+  font-weight: 300;
+  max-width: 520px;
+}
 
 /* ===== Footer ===== */
 .site-footer {
