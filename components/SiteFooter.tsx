@@ -40,6 +40,9 @@ export function SiteFooter() {
                 <a href="#data">Insights</a>
               </li>
               <li>
+                <a href="#film">Film</a>
+              </li>
+              <li>
                 <a href="#gallery">Editorial</a>
               </li>
               <li>

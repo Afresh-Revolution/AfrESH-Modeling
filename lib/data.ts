@@ -36,7 +36,7 @@ export async function fetchEditorial(): Promise<EditorialItem[]> {
   if (pool) {
     try {
       const { rows } = await pool.query<EditorialItem>(
-        `SELECT id::text, title, image_url, sort_order
+        `SELECT id::text, title, image_url, video_url, sort_order
          FROM editorial
          ORDER BY sort_order ASC NULLS LAST, title ASC`
       );
@@ -50,7 +50,7 @@ export async function fetchEditorial(): Promise<EditorialItem[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("editorial")
-      .select("id,title,image_url,sort_order")
+      .select("id,title,image_url,video_url,sort_order")
       .order("sort_order", { ascending: true });
 
     if (!error && data?.length) return data as EditorialItem[];
