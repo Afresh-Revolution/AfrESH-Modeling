@@ -8,7 +8,7 @@ export async function GET() {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Failed to load editorial" },
+      { error: "Could not load campaigns." },
       { status: 500 }
     );
   }

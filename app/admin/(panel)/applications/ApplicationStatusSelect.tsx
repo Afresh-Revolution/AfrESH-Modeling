@@ -4,7 +4,15 @@ import { setApplicationStatus } from "../../actions";
 import styles from "../../admin.module.scss";
 import { useTransition } from "react";
 
-const STATUSES = ["new", "reviewed", "shortlisted", "rejected", "archived"];
+const STATUSES = ["new", "reviewed", "shortlisted", "rejected", "archived"] as const;
+
+const STATUS_LABEL: Record<(typeof STATUSES)[number], string> = {
+  new: "New",
+  reviewed: "Reviewed",
+  shortlisted: "Shortlisted",
+  rejected: "Rejected",
+  archived: "Archived",
+};
 
 export function ApplicationStatusSelect({
   id,
@@ -29,7 +37,7 @@ export function ApplicationStatusSelect({
     >
       {STATUSES.map((s) => (
         <option key={s} value={s}>
-          {s}
+          {STATUS_LABEL[s]}
         </option>
       ))}
     </select>

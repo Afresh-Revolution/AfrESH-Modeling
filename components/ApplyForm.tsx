@@ -72,7 +72,7 @@ export function ApplyForm() {
     const apiBase = (process.env.NEXT_PUBLIC_BASE_URL ?? "").replace(/\/$/, "");
     if (!apiBase) {
       showToast(
-        "Application server is not configured (set NEXT_PUBLIC_BASE_URL).",
+        "Applications are not available right now. Please try again later.",
         "error"
       );
       return;

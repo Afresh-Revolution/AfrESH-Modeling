@@ -47,7 +47,7 @@ export async function adminLoginAction(
   try {
     base = backendBase();
   } catch {
-    return { error: "Server misconfiguration (BASE_URL)" };
+    return { error: "Sign-in is not available right now. Please try again later." };
   }
 
   const res = await fetch(`${base}/api/auth/login`, {
@@ -83,7 +83,7 @@ export async function adminLogoutAction() {
 
 export async function fetchApplicationsJson() {
   const res = await adminFetch("/api/admin/applications");
-  if (!res.ok) throw new Error("Failed to load applications");
+  if (!res.ok) throw new Error("We couldn't load submissions. Refresh the page and try again.");
   return res.json() as Promise<{
     applications: Record<string, unknown>[];
   }>;
@@ -91,7 +91,7 @@ export async function fetchApplicationsJson() {
 
 export async function fetchRosterJson() {
   const res = await adminFetch("/api/admin/roster");
-  if (!res.ok) throw new Error("Failed to load roster");
+  if (!res.ok) throw new Error("We couldn't load the roster. Refresh the page and try again.");
   return res.json() as Promise<{
     roster: Record<string, unknown>[];
   }>;
@@ -99,7 +99,7 @@ export async function fetchRosterJson() {
 
 export async function fetchEditorialJson() {
   const res = await adminFetch("/api/admin/editorial");
-  if (!res.ok) throw new Error("Failed to load editorial");
+  if (!res.ok) throw new Error("We couldn't load campaigns. Refresh the page and try again.");
   return res.json() as Promise<{
     editorial: Record<string, unknown>[];
   }>;
@@ -115,7 +115,7 @@ export async function createRosterEntry(formData: FormData) {
   });
   if (!res.ok) {
     const j = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(j.error ?? "Create failed");
+    throw new Error(j.error ?? "Could not add this profile. Please try again.");
   }
   revalidatePath("/admin/roster");
   revalidatePath("/");
@@ -131,7 +131,7 @@ export async function updateRosterEntry(id: string, formData: FormData) {
   });
   if (!res.ok) {
     const j = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(j.error ?? "Update failed");
+    throw new Error(j.error ?? "Could not save your changes. Please try again.");
   }
   revalidatePath("/admin/roster");
   revalidatePath("/");
@@ -144,7 +144,7 @@ export async function deleteRosterEntry(id: string) {
     method: "DELETE",
     headers,
   });
-  if (!res.ok) throw new Error("Delete failed");
+  if (!res.ok) throw new Error("Could not remove this profile. Please try again.");
   revalidatePath("/admin/roster");
   revalidatePath("/");
 }
@@ -159,7 +159,7 @@ export async function createEditorialEntry(formData: FormData) {
   });
   if (!res.ok) {
     const j = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(j.error ?? "Create failed");
+    throw new Error(j.error ?? "Could not add this campaign. Please try again.");
   }
   revalidatePath("/admin/editorial");
   revalidatePath("/");
@@ -175,7 +175,7 @@ export async function updateEditorialEntry(id: string, formData: FormData) {
   });
   if (!res.ok) {
     const j = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(j.error ?? "Update failed");
+    throw new Error(j.error ?? "Could not save your changes. Please try again.");
   }
   revalidatePath("/admin/editorial");
   revalidatePath("/");
@@ -188,7 +188,7 @@ export async function deleteEditorialEntry(id: string) {
     method: "DELETE",
     headers,
   });
-  if (!res.ok) throw new Error("Delete failed");
+  if (!res.ok) throw new Error("Could not remove this campaign. Please try again.");
   revalidatePath("/admin/editorial");
   revalidatePath("/");
 }
@@ -207,6 +207,6 @@ export async function setApplicationStatus(id: string, status: string) {
       body: JSON.stringify({ status }),
     }
   );
-  if (!res.ok) throw new Error("Status update failed");
+  if (!res.ok) throw new Error("Could not update the status. Please try again.");
   revalidatePath("/admin/applications");
 }
