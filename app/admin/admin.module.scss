@@ -71,6 +71,11 @@
   margin-bottom: 1.5rem;
 }
 
+/* Deep link from admin nav “Film” — offset sticky header */
+.card#film {
+  scroll-margin-top: 5rem;
+}
+
 .tableWrap {
   overflow-x: auto;
   border-radius: 10px;

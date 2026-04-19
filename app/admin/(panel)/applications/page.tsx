@@ -4,9 +4,14 @@ import { ApplicationStatusSelect } from "./ApplicationStatusSelect";
 
 function fmtPhotos(photo_urls: unknown): string {
   if (photo_urls == null) return "—";
-  if (Array.isArray(photo_urls)) return `${photo_urls.length} file(s)`;
-  if (typeof photo_urls === "object")
-    return `${Object.keys(photo_urls as object).length} ref(s)`;
+  if (Array.isArray(photo_urls)) {
+    const n = photo_urls.length;
+    return n === 0 ? "None" : n === 1 ? "1 photo" : `${n} photos`;
+  }
+  if (typeof photo_urls === "object") {
+    const n = Object.keys(photo_urls as object).length;
+    return n === 0 ? "None" : n === 1 ? "1 photo" : `${n} photos`;
+  }
   return String(photo_urls);
 }
 
@@ -17,8 +22,7 @@ export default async function AdminApplicationsPage() {
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Model submissions</h1>
       <p className={styles.adminSubtitle}>
-        Applications submitted through the public apply form (handled by{" "}
-        <code style={{ color: "#c9a84c" }}>POST /api/applications</code> on the Node server).
+        Applications people send in from the public &ldquo;Apply&rdquo; page on the site.
       </p>
 
       <div className={styles.tableWrap}>

@@ -6,8 +6,7 @@ export default function AdminHomePage() {
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Dashboard</h1>
       <p className={styles.adminSubtitle}>
-        Manage talent applications, roster images, and editorial campaigns. All mutations run through
-        the Fastify API in <code style={{ color: "#c9a84c" }}>/backend</code>.
+        Review applications, update the talent roster and photos, and manage campaigns and film clips for the public site.
       </p>
       <div className={styles.card}>
         <h2 className={styles.adminTitle} style={{ fontSize: "1.1rem" }}>
@@ -18,7 +17,7 @@ export default function AdminHomePage() {
             <Link href="/admin/applications" style={{ color: "#c9a84c" }}>
               Model submissions
             </Link>{" "}
-            — review apply-form entries
+            — review applications from the site
           </li>
           <li>
             <Link href="/admin/roster" style={{ color: "#c9a84c" }}>
@@ -28,9 +27,15 @@ export default function AdminHomePage() {
           </li>
           <li>
             <Link href="/admin/editorial" style={{ color: "#c9a84c" }}>
-              Recent campaigns
+              Campaigns
             </Link>{" "}
-            — editorial grid imagery
+            — homepage gallery and optional film clips
+          </li>
+          <li>
+            <Link href="/admin/editorial#film" style={{ color: "#c9a84c" }}>
+              Film
+            </Link>{" "}
+            — open the film section on this page
           </li>
         </ul>
       </div>

@@ -16,6 +16,7 @@ export default function AdminPanelLayout({
           <Link href="/admin/applications">Submissions</Link>
           <Link href="/admin/roster">Roster</Link>
           <Link href="/admin/editorial">Campaigns</Link>
+          <Link href="/admin/editorial#film">Film</Link>
           <Link href="/">View site</Link>
           <form action={adminLogoutAction}>
             <button type="submit" className={`${styles.btn} ${styles.btnGhost}`}>

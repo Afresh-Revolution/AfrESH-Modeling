@@ -8,7 +8,7 @@ export async function GET() {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Failed to load roster" },
+      { error: "Could not load talent profiles." },
       { status: 500 }
     );
   }

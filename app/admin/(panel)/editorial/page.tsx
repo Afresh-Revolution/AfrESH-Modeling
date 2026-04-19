@@ -14,12 +14,11 @@ export default async function AdminEditorialPage() {
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Recent campaigns</h1>
       <p className={styles.adminSubtitle}>
-        Editorial grid and film section on the homepage. Images and optional videos upload to
-        Cloudinary (<code style={{ color: "#c9a84c" }}>onyxx/editorial</code>). Videos also
-        appear in the <strong>Film &amp; Campaign</strong> block when set.
+        These appear on the homepage gallery and in the Film section. Upload a cover image for each
+        campaign; add a video if you want it to show in Film as well.
       </p>
 
-      <div className={styles.card}>
+      <div className={styles.card} id="film">
         <h2 className={styles.adminTitle} style={{ fontSize: "1.1rem" }}>
           Add campaign
         </h2>
@@ -39,7 +38,7 @@ export default async function AdminEditorialPage() {
             </div>
             <div>
               <label className={styles.label} htmlFor="ed-sort">
-                Sort order
+                Display order
               </label>
               <input
                 id="ed-sort"
@@ -142,7 +141,7 @@ export default async function AdminEditorialPage() {
                           />
                         </div>
                         <div>
-                          <label className={styles.label}>Sort</label>
+                          <label className={styles.label}>Display order</label>
                           <input
                             name="sort_order"
                             type="number"

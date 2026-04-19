@@ -14,8 +14,7 @@ export default async function AdminRosterPage() {
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Roster</h1>
       <p className={styles.adminSubtitle}>
-        Upload hero images for talent cards. Images go to Cloudinary (
-        <code style={{ color: "#c9a84c" }}>onyxx/roster</code> folder by default).
+        Upload the main photo for each talent card. Files are saved automatically when you submit the form.
       </p>
 
       <div className={styles.card}>
@@ -50,7 +49,7 @@ export default async function AdminRosterPage() {
             </div>
             <div>
               <label className={styles.label} htmlFor="new-sort">
-                Sort order
+                Display order
               </label>
               <input
                 id="new-sort"
@@ -111,7 +110,7 @@ export default async function AdminRosterPage() {
                       <div style={{ fontSize: "0.8rem", color: "#a09888" }}>
                         <strong style={{ color: "#f5f0e8" }}>{String(m.name)}</strong>
                         <br />
-                        {String(m.category)} · sort {String(m.sort_order ?? 0)}
+                        {String(m.category)} · order {String(m.sort_order ?? 0)}
                       </div>
                     </div>
                   </td>
@@ -138,7 +137,7 @@ export default async function AdminRosterPage() {
                           />
                         </div>
                         <div>
-                          <label className={styles.label}>Sort</label>
+                          <label className={styles.label}>Display order</label>
                           <input
                             name="sort_order"
                             type="number"
@@ -180,7 +179,7 @@ export default async function AdminRosterPage() {
       </div>
 
       {roster.length === 0 ? (
-        <p className={styles.adminSubtitle}>No roster rows yet. Create one above.</p>
+        <p className={styles.adminSubtitle}>No talent profiles yet. Add one above.</p>
       ) : null}
     </main>
   );
