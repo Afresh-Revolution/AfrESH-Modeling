@@ -9,8 +9,9 @@ export type RosterModel = {
 export type EditorialItem = {
   id?: string;
   title: string;
+  /** Poster / gallery image; optional when row is video-only. */
   image_url: string;
-  /** Optional campaign video (e.g. Cloudinary URL). */
+  /** Optional campaign video (e.g. Cloudinary `.../video/upload/...` URL). */
   video_url?: string | null;
   sort_order?: number;
 };

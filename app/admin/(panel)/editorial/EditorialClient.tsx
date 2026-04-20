@@ -189,6 +189,17 @@ function RowEditor({ item }: { item: EditorialItem }) {
             fd.delete("image");
           } else {
             fd.delete("image_url");
+            const maybeImage = getNonEmptyFile(fd, "image");
+            if (maybeImage) {
+              const sig = await fetchCloudinarySignature("image");
+              const { secure_url } = await xhrCloudinaryUpload({
+                file: maybeImage,
+                sig,
+                onProgress: (p) => setUpload({ kind: "uploading", percent: p }),
+              });
+              fd.delete("image");
+              fd.set("image_url", secure_url);
+            }
           }
 
           await xhrMultipart({
@@ -371,6 +382,17 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                 fd.delete("image");
               } else {
                 fd.delete("image_url");
+                const maybeImage = getNonEmptyFile(fd, "image");
+                if (maybeImage) {
+                  const sig = await fetchCloudinarySignature("image");
+                  const { secure_url } = await xhrCloudinaryUpload({
+                    file: maybeImage,
+                    sig,
+                    onProgress: (p) => setUpload({ kind: "uploading", percent: p }),
+                  });
+                  fd.delete("image");
+                  fd.set("image_url", secure_url);
+                }
               }
 
               await xhrMultipart({

@@ -999,20 +999,56 @@ img {
   );
 }
 .film-grid {
+  --film-cols-sm: 1;
+  --film-cols-lg: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-  gap: 1.5rem;
-  margin-top: 3rem;
+  gap: 1.25rem 1.5rem;
+  margin-top: 2.5rem;
+  min-width: 0;
+  width: 100%;
+  grid-template-columns: 1fr;
 }
+
+/* One film: cap width, centre on large screens */
+@media (min-width: 720px) {
+  .film-grid[data-layout="single"] {
+    grid-template-columns: minmax(0, min(100%, 38rem));
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1100px) {
+  .film-grid[data-layout="single"] {
+    grid-template-columns: minmax(0, min(100%, 46rem));
+  }
+}
+
+/* Multiple: equal fr columns; tablet uses --film-cols-sm, desktop --film-cols-lg */
+@media (min-width: 640px) {
+  .film-grid[data-layout="multi"] {
+    grid-template-columns: repeat(var(--film-cols-sm), minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .film-grid[data-layout="multi"] {
+    grid-template-columns: repeat(var(--film-cols-lg), minmax(0, 1fr));
+  }
+}
+
 .film-card {
   border-radius: 12px;
   overflow: hidden;
   background: var(--card);
   border: 1px solid rgba(201, 168, 76, 0.12);
   min-width: 0;
+  max-width: 100%;
 }
 .film-video {
   width: 100%;
+  max-width: 100%;
   aspect-ratio: 16 / 9;
   display: block;
   object-fit: cover;
@@ -1250,6 +1286,36 @@ img {
   background: linear-gradient(135deg, #2e1a1a, #1a0d0d);
   border: 1px solid rgba(232, 93, 117, 0.4);
   color: #e85d75;
+}
+
+/* ===== Scroll To Top ===== */
+.scroll-top-btn {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-strong);
+  background: rgba(14, 14, 14, 0.9);
+  color: var(--gold);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1100;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease, background 0.2s ease;
+}
+.scroll-top-btn.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.scroll-top-btn:hover {
+  background: var(--gold);
+  color: var(--bg);
 }
 
 /* ===== Scroll Reveal ===== */
