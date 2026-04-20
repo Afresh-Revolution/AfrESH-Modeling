@@ -97,7 +97,6 @@ function xhrCloudinaryUpload(opts: {
     fd.set("timestamp", String(opts.sig.timestamp));
     fd.set("signature", opts.sig.signature);
     fd.set("folder", opts.sig.folder);
-    fd.set("resource_type", opts.sig.resource_type);
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", endpoint);
