@@ -24,6 +24,7 @@ function buildCsp() {
 
   // If your backend / API lives on a different origin, allow it here.
   const connectSrc = ["'self'", "https:", "wss:"];
+  const mediaSrc = ["'self'", "blob:", "https://res.cloudinary.com"];
 
   // Allow Font Awesome stylesheet + webfonts from cdnjs (if you load it from there).
   styleSrc.push("https://cdnjs.cloudflare.com");
@@ -36,6 +37,7 @@ function buildCsp() {
     `frame-ancestors 'none'`,
     `form-action 'self'`,
     `img-src ${imgSrc.join(" ")}`,
+    `media-src ${mediaSrc.join(" ")}`,
     `font-src ${fontSrc.join(" ")}`,
     `style-src ${styleSrc.join(" ")}`,
     `script-src ${scriptSrc.join(" ")}`,

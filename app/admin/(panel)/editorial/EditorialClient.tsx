@@ -156,7 +156,9 @@ function RowEditor({ item }: { item: EditorialItem }) {
         setSaving(true);
         setUpload({ kind: "uploading", percent: 0 });
         try {
-          const fd = new FormData(e.currentTarget);
+          const form = e.currentTarget as HTMLFormElement | null;
+          if (!form) throw new Error("Form not found");
+          const fd = new FormData(form);
 
           // Don't send empty file fields.
           deleteEmptyFileField(fd, "image");
@@ -197,7 +199,7 @@ function RowEditor({ item }: { item: EditorialItem }) {
           });
           setUpload({ kind: "idle" });
           router.refresh();
-          (e.currentTarget as HTMLFormElement).reset();
+          form.reset();
         } catch (err) {
           setUpload({
             kind: "error",
@@ -320,7 +322,13 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
             e.preventDefault();
             if (creating) return;
 
-            const fd = new FormData(e.currentTarget);
+            const form = e.currentTarget as HTMLFormElement | null;
+            if (!form) {
+              setUpload({ kind: "error", message: "Form not found" });
+              return;
+            }
+
+            const fd = new FormData(form);
             // Don't send empty file fields.
             deleteEmptyFileField(fd, "image");
             deleteEmptyFileField(fd, "video");
@@ -373,7 +381,7 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
               });
               setUpload({ kind: "idle" });
               router.refresh();
-              (e.currentTarget as HTMLFormElement).reset();
+              form.reset();
             } catch (err) {
               setUpload({
                 kind: "error",
