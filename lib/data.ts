@@ -3,6 +3,23 @@ import { FALLBACK_EDITORIAL, FALLBACK_ROSTER } from "./roster-fallback";
 import { createSupabaseAnon } from "./supabase";
 import type { EditorialItem, RosterModel } from "./types";
 
+function backendBase(): string | null {
+  const base = process.env.BASE_URL?.trim().replace(/\/$/, "");
+  return base ? base : null;
+}
+
+async function tryFetchFromBackend<T>(path: string): Promise<T | null> {
+  const base = backendBase();
+  if (!base) return null;
+  try {
+    const res = await fetch(`${base}${path}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchRoster(): Promise<RosterModel[]> {
   const pool = getPgPool();
   if (pool) {
@@ -27,6 +44,9 @@ export async function fetchRoster(): Promise<RosterModel[]> {
 
     if (!error && data?.length) return data as RosterModel[];
   }
+
+  const backend = await tryFetchFromBackend<{ roster?: RosterModel[] }>("/api/roster");
+  if (backend?.roster?.length) return backend.roster;
 
   return FALLBACK_ROSTER;
 }
@@ -55,6 +75,9 @@ export async function fetchEditorial(): Promise<EditorialItem[]> {
 
     if (!error && data?.length) return data as EditorialItem[];
   }
+
+  const backend = await tryFetchFromBackend<{ editorial?: EditorialItem[] }>("/api/editorial");
+  if (backend?.editorial?.length) return backend.editorial;
 
   return FALLBACK_EDITORIAL;
 }
