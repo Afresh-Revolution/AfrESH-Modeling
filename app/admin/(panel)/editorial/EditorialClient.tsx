@@ -27,6 +27,22 @@ type CloudinarySignature = {
   resource_type: "image" | "video" | "raw";
 };
 
+function isNonEmptyString(v: FormDataEntryValue | null): v is string {
+  return typeof v === "string" && v.trim().length > 0;
+}
+
+function getNonEmptyFile(fd: FormData, key: string): File | null {
+  const v = fd.get(key);
+  if (!(v instanceof File)) return null;
+  if (v.size <= 0) return null;
+  return v;
+}
+
+function deleteEmptyFileField(fd: FormData, key: string) {
+  const v = fd.get(key);
+  if (v instanceof File && v.size <= 0) fd.delete(key);
+}
+
 function parseErr(text: string): string {
   try {
     const j = JSON.parse(text) as { error?: string; message?: string };
@@ -142,9 +158,18 @@ function RowEditor({ item }: { item: EditorialItem }) {
         try {
           const fd = new FormData(e.currentTarget);
 
-          const maybeVideo = fd.get("video");
-          const hasVideo = maybeVideo instanceof File && maybeVideo.size > 0;
-          if (hasVideo) {
+          // Don't send empty file fields.
+          deleteEmptyFileField(fd, "image");
+          deleteEmptyFileField(fd, "video");
+
+          const manualVideoUrl = fd.get("video_url");
+          if (isNonEmptyString(manualVideoUrl)) {
+            fd.set("video_url", manualVideoUrl.trim());
+            fd.delete("video");
+          } else {
+            fd.delete("video_url");
+            const maybeVideo = getNonEmptyFile(fd, "video");
+            if (maybeVideo) {
             const sig = await fetchCloudinarySignature("video");
             const { secure_url } = await xhrCloudinaryUpload({
               file: maybeVideo,
@@ -153,6 +178,15 @@ function RowEditor({ item }: { item: EditorialItem }) {
             });
             fd.delete("video");
             fd.set("video_url", secure_url);
+          }
+          }
+
+          const manualImageUrl = fd.get("image_url");
+          if (isNonEmptyString(manualImageUrl)) {
+            fd.set("image_url", manualImageUrl.trim());
+            fd.delete("image");
+          } else {
+            fd.delete("image_url");
           }
 
           await xhrMultipart({
@@ -193,8 +227,26 @@ function RowEditor({ item }: { item: EditorialItem }) {
           <input name="image" type="file" accept="image/*" className={styles.file} />
         </div>
         <div>
+          <label className={styles.label}>Or image URL (optional)</label>
+          <input
+            name="image_url"
+            className={styles.input}
+            placeholder="https://res.cloudinary.com/.../image/upload/..."
+            inputMode="url"
+          />
+        </div>
+        <div>
           <label className={styles.label}>New video (optional)</label>
           <input name="video" type="file" accept="video/*" className={styles.file} />
+        </div>
+        <div>
+          <label className={styles.label}>Or video URL (optional)</label>
+          <input
+            name="video_url"
+            className={styles.input}
+            placeholder="https://res.cloudinary.com/.../video/upload/..."
+            inputMode="url"
+          />
         </div>
 
         {item.video_url ? (
@@ -269,9 +321,16 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
             if (creating) return;
 
             const fd = new FormData(e.currentTarget);
-            const hasImage = fd.get("image") instanceof File && (fd.get("image") as File).size > 0;
-            const hasVideo = fd.get("video") instanceof File && (fd.get("video") as File).size > 0;
-            if (!hasImage && !hasVideo) {
+            // Don't send empty file fields.
+            deleteEmptyFileField(fd, "image");
+            deleteEmptyFileField(fd, "video");
+
+            const hasImageFile = !!getNonEmptyFile(fd, "image");
+            const hasVideoFile = !!getNonEmptyFile(fd, "video");
+            const hasVideoUrl = isNonEmptyString(fd.get("video_url"));
+            const hasImageUrl = isNonEmptyString(fd.get("image_url"));
+
+            if (!hasImageFile && !hasVideoFile && !hasVideoUrl && !hasImageUrl) {
               setUpload({ kind: "error", message: "Please choose an image or a video." });
               return;
             }
@@ -279,9 +338,14 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
             setCreating(true);
             setUpload({ kind: "uploading", percent: 0 });
             try {
-              const maybeVideo = fd.get("video");
-              const doVideo = maybeVideo instanceof File && maybeVideo.size > 0;
-              if (doVideo) {
+              const manualVideoUrl = fd.get("video_url");
+              if (isNonEmptyString(manualVideoUrl)) {
+                fd.set("video_url", manualVideoUrl.trim());
+                fd.delete("video");
+              } else {
+                fd.delete("video_url");
+                const maybeVideo = getNonEmptyFile(fd, "video");
+                if (maybeVideo) {
                 const sig = await fetchCloudinarySignature("video");
                 const { secure_url } = await xhrCloudinaryUpload({
                   file: maybeVideo,
@@ -290,6 +354,15 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                 });
                 fd.delete("video");
                 fd.set("video_url", secure_url);
+              }
+              }
+
+              const manualImageUrl = fd.get("image_url");
+              if (isNonEmptyString(manualImageUrl)) {
+                fd.set("image_url", manualImageUrl.trim());
+                fd.delete("image");
+              } else {
+                fd.delete("image_url");
               }
 
               await xhrMultipart({
@@ -349,6 +422,18 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
               />
             </div>
             <div>
+              <label className={styles.label} htmlFor="ed-image-url">
+                Or image URL (optional)
+              </label>
+              <input
+                id="ed-image-url"
+                name="image_url"
+                className={styles.input}
+                placeholder="https://res.cloudinary.com/.../image/upload/..."
+                inputMode="url"
+              />
+            </div>
+            <div>
               <label className={styles.label} htmlFor="ed-video">
                 Video (optional)
               </label>
@@ -358,6 +443,18 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                 type="file"
                 accept="video/*"
                 className={styles.file}
+              />
+            </div>
+            <div>
+              <label className={styles.label} htmlFor="ed-video-url">
+                Or video URL (optional)
+              </label>
+              <input
+                id="ed-video-url"
+                name="video_url"
+                className={styles.input}
+                placeholder="https://res.cloudinary.com/.../video/upload/..."
+                inputMode="url"
               />
             </div>
             <div>
