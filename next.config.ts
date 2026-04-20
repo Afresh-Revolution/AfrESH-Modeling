@@ -20,6 +20,7 @@ function buildCsp() {
     "blob:",
     "https://res.cloudinary.com",
     "https://picsum.photos",
+    "https://fastly.picsum.photos",
   ];
 
   // If your backend / API lives on a different origin, allow it here.
@@ -58,6 +59,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
       { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
+      { protocol: "https", hostname: "fastly.picsum.photos", pathname: "/**" },
     ],
   },
   async headers() {
