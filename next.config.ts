@@ -12,6 +12,7 @@ function buildCsp() {
     ...(isProd ? [] : ["'unsafe-eval'"]),
   ];
   const styleSrc = ["'self'", "'unsafe-inline'"];
+  const fontSrc = ["'self'", "data:"];
 
   const imgSrc = [
     "'self'",
@@ -24,6 +25,10 @@ function buildCsp() {
   // If your backend / API lives on a different origin, allow it here.
   const connectSrc = ["'self'", "https:", "wss:"];
 
+  // Allow Font Awesome stylesheet + webfonts from cdnjs (if you load it from there).
+  styleSrc.push("https://cdnjs.cloudflare.com");
+  fontSrc.push("https://cdnjs.cloudflare.com");
+
   const directives: string[] = [
     `default-src 'self'`,
     `base-uri 'self'`,
@@ -31,7 +36,7 @@ function buildCsp() {
     `frame-ancestors 'none'`,
     `form-action 'self'`,
     `img-src ${imgSrc.join(" ")}`,
-    `font-src 'self' data:`,
+    `font-src ${fontSrc.join(" ")}`,
     `style-src ${styleSrc.join(" ")}`,
     `script-src ${scriptSrc.join(" ")}`,
     `connect-src ${connectSrc.join(" ")}`,
