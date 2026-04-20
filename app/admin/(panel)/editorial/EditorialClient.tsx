@@ -18,6 +18,15 @@ type UploadState =
   | { kind: "uploading"; percent: number }
   | { kind: "error"; message: string };
 
+type CloudinarySignature = {
+  cloudName: string;
+  apiKey: string;
+  timestamp: number;
+  signature: string;
+  folder: string;
+  resource_type: "image" | "video" | "raw";
+};
+
 function parseErr(text: string): string {
   try {
     const j = JSON.parse(text) as { error?: string; message?: string };
@@ -53,6 +62,70 @@ function xhrMultipart(opts: {
   });
 }
 
+async function fetchCloudinarySignature(
+  resource_type: "image" | "video" | "raw"
+): Promise<CloudinarySignature> {
+  const res = await fetch(
+    `/api/admin/editorial/upload-signature?resource_type=${encodeURIComponent(
+      resource_type
+    )}`,
+    { cache: "no-store" }
+  );
+  const j = (await res.json().catch(() => ({}))) as Partial<CloudinarySignature> & {
+    error?: string;
+  };
+  if (!res.ok) throw new Error(j.error ?? "Could not get upload signature");
+  if (!j.cloudName || !j.apiKey || !j.signature || !j.timestamp || !j.folder || !j.resource_type) {
+    throw new Error("Invalid upload signature response");
+  }
+  return j as CloudinarySignature;
+}
+
+function xhrCloudinaryUpload(opts: {
+  file: File;
+  sig: CloudinarySignature;
+  onProgress: (percent: number) => void;
+}): Promise<{ secure_url: string }> {
+  return new Promise((resolve, reject) => {
+    const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(
+      opts.sig.cloudName
+    )}/${encodeURIComponent(opts.sig.resource_type)}/upload`;
+
+    const fd = new FormData();
+    fd.set("file", opts.file);
+    fd.set("api_key", opts.sig.apiKey);
+    fd.set("timestamp", String(opts.sig.timestamp));
+    fd.set("signature", opts.sig.signature);
+    fd.set("folder", opts.sig.folder);
+    fd.set("resource_type", opts.sig.resource_type);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint);
+
+    xhr.upload.onprogress = (e) => {
+      if (!e.lengthComputable) return;
+      const p = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
+      opts.onProgress(p);
+    };
+
+    xhr.onerror = () => reject(new Error("Network error"));
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        return reject(new Error(parseErr(xhr.responseText)));
+      }
+      try {
+        const j = JSON.parse(xhr.responseText) as { secure_url?: string };
+        if (!j.secure_url) throw new Error("Cloudinary did not return secure_url");
+        resolve({ secure_url: j.secure_url });
+      } catch (e) {
+        reject(e instanceof Error ? e : new Error("Upload failed"));
+      }
+    };
+
+    xhr.send(fd);
+  });
+}
+
 function RowEditor({ item }: { item: EditorialItem }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
@@ -69,6 +142,20 @@ function RowEditor({ item }: { item: EditorialItem }) {
         setUpload({ kind: "uploading", percent: 0 });
         try {
           const fd = new FormData(e.currentTarget);
+
+          const maybeVideo = fd.get("video");
+          const hasVideo = maybeVideo instanceof File && maybeVideo.size > 0;
+          if (hasVideo) {
+            const sig = await fetchCloudinarySignature("video");
+            const { secure_url } = await xhrCloudinaryUpload({
+              file: maybeVideo,
+              sig,
+              onProgress: (p) => setUpload({ kind: "uploading", percent: p }),
+            });
+            fd.delete("video");
+            fd.set("video_url", secure_url);
+          }
+
           await xhrMultipart({
             method: "PATCH",
             url: `/api/admin/editorial/${encodeURIComponent(id)}`,
@@ -193,6 +280,19 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
             setCreating(true);
             setUpload({ kind: "uploading", percent: 0 });
             try {
+              const maybeVideo = fd.get("video");
+              const doVideo = maybeVideo instanceof File && maybeVideo.size > 0;
+              if (doVideo) {
+                const sig = await fetchCloudinarySignature("video");
+                const { secure_url } = await xhrCloudinaryUpload({
+                  file: maybeVideo,
+                  sig,
+                  onProgress: (p) => setUpload({ kind: "uploading", percent: p }),
+                });
+                fd.delete("video");
+                fd.set("video_url", secure_url);
+              }
+
               await xhrMultipart({
                 method: "POST",
                 url: "/api/admin/editorial",
