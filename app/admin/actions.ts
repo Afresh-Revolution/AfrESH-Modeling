@@ -26,6 +26,7 @@ async function adminFetch(path: string, init?: RequestInit) {
   const headers = await authHeaders();
   return fetch(`${backendBase()}${path}`, {
     ...init,
+    cache: "no-store",
     headers: {
       ...init?.headers,
       ...headers,
@@ -53,6 +54,7 @@ export async function adminLoginAction(
   const res = await fetch(`${base}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    cache: "no-store",
     body: JSON.stringify({ email, password }),
   });
 
@@ -77,7 +79,7 @@ export async function adminLoginAction(
 }
 
 export async function adminLogoutAction() {
-  (await cookies()).delete("onyxx_admin");
+  (await cookies()).delete({ name: "onyxx_admin", path: "/" });
   redirect("/admin/login");
 }
 
