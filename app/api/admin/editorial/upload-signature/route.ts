@@ -40,7 +40,8 @@ export async function GET(req: Request) {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const apiKey = process.env.CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
-  const folder = process.env.CLOUDINARY_UPLOAD_FOLDER ?? "onyxx";
+  const baseFolder = process.env.CLOUDINARY_UPLOAD_FOLDER ?? "onyxx";
+  const folder = `${baseFolder.replace(/\/$/, "")}/editorial`;
 
   if (!cloudName || !apiKey || !apiSecret) {
     return NextResponse.json(
@@ -55,10 +56,12 @@ export async function GET(req: Request) {
   const resource_type = allowed.has(resourceType) ? resourceType : "video";
 
   const timestamp = Math.floor(Date.now() / 1000);
+
+  // Cloudinary signed uploads expect a signature over the upload parameters.
+  // `resource_type` is implied by the upload endpoint path and should not be signed.
   const signature = cloudinarySignature(
     {
       folder,
-      resource_type,
       timestamp: String(timestamp),
     },
     apiSecret
