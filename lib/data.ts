@@ -20,7 +20,75 @@ async function tryFetchFromBackend<T>(path: string): Promise<T | null> {
   }
 }
 
+function normalizeRoster(rows: unknown[]): RosterModel[] {
+  const out: RosterModel[] = [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const r = row as Record<string, unknown>;
+    const image =
+      typeof r.image_url === "string"
+        ? r.image_url
+        : typeof r.imageUrl === "string"
+          ? r.imageUrl
+          : "";
+    const name = typeof r.name === "string" ? r.name : "";
+    const category = typeof r.category === "string" ? r.category : "";
+    if (!name || !category || !image) continue;
+    out.push({
+      id: typeof r.id === "string" ? r.id : typeof r.id === "number" ? String(r.id) : undefined,
+      name,
+      category,
+      image_url: image,
+      sort_order: typeof r.sort_order === "number" ? r.sort_order : undefined,
+    });
+  }
+  return out;
+}
+
+function coerceEditorialRow(row: EditorialItem): EditorialItem {
+  return {
+    ...row,
+    image_url: row.image_url ?? "",
+    video_url:
+      typeof row.video_url === "string" && row.video_url.trim().length
+        ? row.video_url.trim()
+        : row.video_url ?? null,
+  };
+}
+
+function normalizeEditorial(rows: unknown[]): EditorialItem[] {
+  const out: EditorialItem[] = [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const r = row as Record<string, unknown>;
+    const title = typeof r.title === "string" ? r.title : "";
+    const image =
+      typeof r.image_url === "string"
+        ? r.image_url
+        : typeof r.imageUrl === "string"
+          ? r.imageUrl
+          : "";
+    const video =
+      typeof r.video_url === "string"
+        ? r.video_url
+        : typeof r.videoUrl === "string"
+          ? r.videoUrl
+          : null;
+    if (!title) continue;
+    if (!image && !video) continue;
+    out.push({
+      id: typeof r.id === "string" ? r.id : typeof r.id === "number" ? String(r.id) : undefined,
+      title,
+      image_url: image,
+      video_url: video,
+      sort_order: typeof r.sort_order === "number" ? r.sort_order : undefined,
+    });
+  }
+  return out;
+}
+
 export async function fetchRoster(): Promise<RosterModel[]> {
+  // Prefer direct DB reads when configured (same data the API persists; avoids stale/wrong HTTP responses).
   const pool = getPgPool();
   if (pool) {
     try {
@@ -45,8 +113,12 @@ export async function fetchRoster(): Promise<RosterModel[]> {
     if (!error && data?.length) return data as RosterModel[];
   }
 
-  const backend = await tryFetchFromBackend<{ roster?: RosterModel[] }>("/api/roster");
-  if (backend?.roster?.length) return backend.roster;
+  const backend = await tryFetchFromBackend<{ roster?: unknown[]; data?: unknown[] }>("/api/roster");
+  const rosterRows = backend?.roster?.length ? backend.roster : backend?.data;
+  if (Array.isArray(rosterRows) && rosterRows.length) {
+    const normalized = normalizeRoster(rosterRows);
+    if (normalized.length) return normalized;
+  }
 
   return FALLBACK_ROSTER;
 }
@@ -60,7 +132,7 @@ export async function fetchEditorial(): Promise<EditorialItem[]> {
          FROM editorial
          ORDER BY sort_order ASC NULLS LAST, title ASC`
       );
-      if (rows.length) return rows;
+      if (rows.length) return rows.map((r) => coerceEditorialRow(r));
     } catch (e) {
       console.error("[fetchEditorial] postgres:", e);
     }
@@ -73,11 +145,19 @@ export async function fetchEditorial(): Promise<EditorialItem[]> {
       .select("id,title,image_url,video_url,sort_order")
       .order("sort_order", { ascending: true });
 
-    if (!error && data?.length) return data as EditorialItem[];
+    if (!error && data?.length) {
+      return (data as EditorialItem[]).map((r) => coerceEditorialRow(r));
+    }
   }
 
-  const backend = await tryFetchFromBackend<{ editorial?: EditorialItem[] }>("/api/editorial");
-  if (backend?.editorial?.length) return backend.editorial;
+  const backend = await tryFetchFromBackend<{ editorial?: unknown[]; data?: unknown[] }>(
+    "/api/editorial"
+  );
+  const editorialRows = backend?.editorial?.length ? backend.editorial : backend?.data;
+  if (Array.isArray(editorialRows) && editorialRows.length) {
+    const normalized = normalizeEditorial(editorialRows);
+    if (normalized.length) return normalized.map((r) => coerceEditorialRow(r));
+  }
 
-  return FALLBACK_EDITORIAL;
+  return FALLBACK_EDITORIAL.map((r) => coerceEditorialRow(r));
 }

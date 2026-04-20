@@ -1,5 +1,6 @@
 import { getAdminAccessToken } from "@/lib/admin-session";
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 function backendBase() {
   const base = process.env.BASE_URL?.replace(/\/$/, "");
@@ -16,6 +17,11 @@ export async function POST(req: Request) {
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
   });
+
+  if (res.ok) {
+    revalidatePath("/");
+    revalidatePath("/admin/editorial");
+  }
 
   const body = await res.text();
   return new NextResponse(body, {

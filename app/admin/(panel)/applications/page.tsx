@@ -1,5 +1,7 @@
 import { fetchApplicationsJson } from "../../actions";
 import styles from "../../admin.module.scss";
+import { ApplicationInterviewCell } from "./ApplicationInterviewCell";
+import { ApplicationPhotoButton } from "./ApplicationPhotoButton";
 import { ApplicationStatusSelect } from "./ApplicationStatusSelect";
 
 function fmtPhotos(photo_urls: unknown): string {
@@ -15,6 +17,28 @@ function fmtPhotos(photo_urls: unknown): string {
   return String(photo_urls);
 }
 
+function AboutCell({ message }: { message: unknown }) {
+  const t = typeof message === "string" ? message.trim() : "";
+  if (!t) {
+    return <span style={{ color: "#555" }}>—</span>;
+  }
+  const short = t.length > 120 ? `${t.slice(0, 120)}…` : t;
+  return (
+    <span
+      title={t}
+      style={{
+        display: "inline-block",
+        maxWidth: 260,
+        fontSize: "0.8rem",
+        lineHeight: 1.4,
+        color: "#c8beb0",
+      }}
+    >
+      {short}
+    </span>
+  );
+}
+
 export default async function AdminApplicationsPage() {
   const { applications } = await fetchApplicationsJson();
 
@@ -22,7 +46,9 @@ export default async function AdminApplicationsPage() {
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Model submissions</h1>
       <p className={styles.adminSubtitle}>
-        Applications people send in from the public &ldquo;Apply&rdquo; page on the site.
+        Applications people send in from the public &ldquo;Apply&rdquo; page on the site. Choosing
+        Shortlisted or Rejected sends an email via Resend (configure{" "}
+        <code style={{ color: "#a09888" }}>RESEND_API_KEY</code> on the API).
       </p>
 
       <div className={styles.tableWrap}>
@@ -35,7 +61,9 @@ export default async function AdminApplicationsPage() {
               <th>DOB</th>
               <th>City</th>
               <th>Experience</th>
+              <th>About you</th>
               <th>Photos</th>
+              <th>Interview</th>
               <th>Submitted</th>
             </tr>
           </thead>
@@ -57,7 +85,24 @@ export default async function AdminApplicationsPage() {
                 <td>{String(row.date_of_birth ?? "")}</td>
                 <td>{String(row.city ?? "—")}</td>
                 <td>{String(row.experience_level ?? "—")}</td>
-                <td>{fmtPhotos(row.photo_urls)}</td>
+                <td>
+                  <AboutCell message={row.message} />
+                </td>
+                <td>
+                  <ApplicationPhotoButton
+                    photoUrls={row.photo_urls}
+                    label={fmtPhotos(row.photo_urls)}
+                  />
+                </td>
+                <td>
+                  <ApplicationInterviewCell
+                    id={String(row.id)}
+                    status={String(row.status ?? "")}
+                    interviewAt={
+                      row.interview_at != null ? String(row.interview_at) : null
+                    }
+                  />
+                </td>
                 <td style={{ whiteSpace: "nowrap" }}>
                   {row.created_at
                     ? new Date(String(row.created_at)).toLocaleString()

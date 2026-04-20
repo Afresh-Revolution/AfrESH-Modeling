@@ -86,7 +86,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.85rem;
-  min-width: 640px;
+  min-width: 1080px;
 }
 
 .table th,
@@ -501,4 +501,229 @@
   border-radius: 16px;
   border: 1px solid rgba(201, 168, 76, 0.25);
   background: rgba(14, 14, 14, 0.9);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.linkButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: #c9a84c;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.linkButton:hover {
+  color: #f5f0e8;
+}
+
+.photoDialog {
+  padding: 0;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 14px;
+  background: #0e0e0e;
+  color: #f5f0e8;
+  max-width: min(960px, 96vw);
+}
+
+.photoDialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.photoDialogInner {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.photoDialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.photoDialogTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #c9a84c;
+}
+
+.photoDialogClose {
+  background: transparent;
+  border: none;
+  color: #a09888;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+}
+
+.photoDialogClose:hover {
+  color: #f5f0e8;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.photoDialogHint {
+  margin: 0 0 0.75rem;
+  font-size: 0.78rem;
+  color: #7a7268;
+}
+
+.photoDialogGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.photoDialogThumb {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: #141414;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.photoDialogThumb:hover {
+  border-color: rgba(201, 168, 76, 0.45);
+  box-shadow: 0 0 0 1px rgba(201, 168, 76, 0.2);
+}
+
+.photoDialogImg {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.photoFullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  padding: 3rem 3.5rem;
+  background: rgba(0, 0, 0, 0.94);
+  box-sizing: border-box;
+}
+
+.photoFullscreenImg {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+.photoFullscreenClose {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  background: rgba(20, 20, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f5f0e8;
+  font-size: 1.75rem;
+  line-height: 1;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.photoFullscreenClose:hover {
+  background: rgba(40, 40, 40, 0.95);
+  color: #c9a84c;
+}
+
+.photoFullscreenNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 2.75rem;
+  height: 3.5rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 20, 20, 0.75);
+  color: #f5f0e8;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.photoFullscreenNav:hover {
+  background: rgba(50, 50, 50, 0.9);
+  color: #c9a84c;
+}
+
+.photoFullscreenNavPrev {
+  left: 1rem;
+}
+
+.photoFullscreenNavNext {
+  right: 1rem;
+}
+
+.photoFullscreenCounter {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.8rem;
+  color: #a09888;
+  letter-spacing: 0.06em;
+}
+
+.shortlistDialog {
+  padding: 1.25rem 1.35rem;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  border-radius: 14px;
+  background: #0e0e0e;
+  color: #f5f0e8;
+  max-width: min(420px, 94vw);
+}
+
+.shortlistDialog::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.shortlistDialogTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #c9a84c;
+}
+
+.shortlistDialogHint {
+  margin: 0 0 1rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #a09888;
 }

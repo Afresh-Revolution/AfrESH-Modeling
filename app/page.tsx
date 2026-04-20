@@ -5,9 +5,12 @@ import { HeroSection } from "@/components/HeroSection";
 import { ModelsCarousel } from "@/components/ModelsCarousel";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
+import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 import { StatsBar } from "@/components/StatsBar";
 import { VideoShowcase } from "@/components/VideoShowcase";
 import { fetchEditorial, fetchRoster } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const [roster, editorial] = await Promise.all([
@@ -15,7 +18,10 @@ export default async function HomePage() {
     fetchEditorial(),
   ]);
   const filmItems = editorial.filter(
-    (e) => typeof e.video_url === "string" && e.video_url.length > 0
+    (e) => typeof e.video_url === "string" && e.video_url.length > 0,
+  );
+  const campaignItems = editorial.filter(
+    (e) => typeof e.image_url === "string" && e.image_url.length > 0,
   );
 
   return (
@@ -71,8 +77,11 @@ export default async function HomePage() {
               <h2 className="section-title">The ONYXX Ecosystem</h2>
               <p className="section-desc">
                 A{" "}
-                <strong style={{ color: "var(--fg)" }}>scientifically structured</strong>{" "}
-                pipeline that transforms raw potential into industry-leading talent.
+                <strong style={{ color: "var(--fg)" }}>
+                  scientifically structured
+                </strong>{" "}
+                pipeline that transforms raw potential into industry-leading
+                talent.
               </p>
             </div>
           </div>
@@ -95,8 +104,8 @@ export default async function HomePage() {
               <div className="eco-step">Phase 02</div>
               <h3 className="eco-title">Talent Development</h3>
               <p className="eco-desc">
-                Rigorous training in posing, walk, nutrition, and personal branding with
-                industry mentors.
+                Rigorous training in posing, walk, nutrition, and personal
+                branding with industry mentors.
               </p>
             </div>
             <div className="eco-card reveal reveal-delay-3">
@@ -106,8 +115,8 @@ export default async function HomePage() {
               <div className="eco-step">Phase 03</div>
               <h3 className="eco-title">Strategic Placement</h3>
               <p className="eco-desc">
-                AI-matched casting with agencies, brands, and editorial opportunities
-                worldwide.
+                AI-matched casting with agencies, brands, and editorial
+                opportunities worldwide.
               </p>
             </div>
             <div className="eco-card reveal reveal-delay-4">
@@ -124,9 +133,10 @@ export default async function HomePage() {
           </div>
           <div className="eco-arrows reveal">
             <div className="eco-arrow">
-              Scouting <i className="fas fa-chevron-right" aria-hidden /> Development{" "}
-              <i className="fas fa-chevron-right" aria-hidden /> Placement{" "}
-              <i className="fas fa-chevron-right" aria-hidden /> Management
+              Scouting <i className="fas fa-chevron-right" aria-hidden />{" "}
+              Development <i className="fas fa-chevron-right" aria-hidden />{" "}
+              Placement <i className="fas fa-chevron-right" aria-hidden />{" "}
+              Management
             </div>
           </div>
         </div>
@@ -142,8 +152,10 @@ export default async function HomePage() {
               <h2 className="section-title">By The Numbers</h2>
               <p className="section-desc">
                 Data-driven results that validate our approach to{" "}
-                <strong style={{ color: "var(--fg)" }}>model development</strong> and market
-                placement.
+                <strong style={{ color: "var(--fg)" }}>
+                  model development
+                </strong>{" "}
+                and market placement.
               </p>
             </div>
           </div>
@@ -182,23 +194,23 @@ export default async function HomePage() {
             </div>
             <h2 className="section-title">Become Part of the Club</h2>
             <p className="section-desc" style={{ marginBottom: 0 }}>
-              We are always looking for extraordinary individuals. Submit your application
-              below.
+              We are always looking for extraordinary individuals. Submit your
+              application below.
             </p>
           </div>
           <div className="apply-grid">
             <div className="apply-info reveal reveal-delay-1">
               <h3>What We Look For</h3>
               <p>
-                ONYXX CLUB represents a curated selection of talent. Our scouting process
-                is both intuitive and analytical, seeking individuals who bring something
-                unmistakable to the industry.
+                ONYXX CLUB represents a curated selection of talent. Our
+                scouting process is both intuitive and analytical, seeking
+                individuals who bring something unmistakable to the industry.
               </p>
               <ul className="apply-requirements">
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  Height preference: 5&apos;8&quot; and above for women, 6&apos;0&quot; and
-                  above for men
+                  Height preference: 5&apos;8&quot; and above for women,
+                  6&apos;0&quot; and above for men
                 </li>
                 <li>
                   <i className="fas fa-circle" aria-hidden />
@@ -218,7 +230,8 @@ export default async function HomePage() {
                 </li>
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  Open to all ethnicities, body types within our diverse categories
+                  Open to all ethnicities, body types within our diverse
+                  categories
                 </li>
               </ul>
             </div>
@@ -240,16 +253,21 @@ export default async function HomePage() {
               </div>
               <h2 className="section-title">Recent Campaigns</h2>
               <p className="section-desc">
-                A glimpse into the campaigns and editorial work produced through the{" "}
-                <strong style={{ color: "var(--gold)" }}>ONYXX ecosystem</strong>.
+                A glimpse into the campaigns and editorial work produced through
+                the{" "}
+                <strong style={{ color: "var(--gold)" }}>
+                  ONYXX ecosystem
+                </strong>
+                .
               </p>
             </div>
           </div>
-          <GalleryGrid items={editorial} />
+          <GalleryGrid items={campaignItems} />
         </div>
       </section>
 
       <SiteFooter />
+      <ScrollToTopButton />
     </>
   );
 }

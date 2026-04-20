@@ -195,20 +195,66 @@ export async function deleteEditorialEntry(id: string) {
   revalidatePath("/");
 }
 
-export async function setApplicationStatus(id: string, status: string) {
+export type SetApplicationStatusResult =
+  | { ok: true; emailError?: string }
+  | { ok: false; error: string };
+
+export async function setApplicationStatus(
+  id: string,
+  status: string,
+  interviewAt?: string | null
+): Promise<SetApplicationStatusResult> {
   await verifyAdminSession();
   const headers = await authHeaders();
+  const body: Record<string, unknown> = { status };
+  if (interviewAt) body.interview_at = interviewAt;
   const res = await fetch(
-    `${backendBase()}/api/admin/applications/${id}/status`,
+    `${backendBase()}/api/admin/applications/${encodeURIComponent(id)}/status`,
     {
       method: "PATCH",
       headers: {
         ...headers,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(body),
     }
   );
-  if (!res.ok) throw new Error("Could not update the status. Please try again.");
+  const data = (await res.json().catch(() => ({}))) as {
+    error?: string;
+    emailError?: string;
+  };
+  if (!res.ok) {
+    return { ok: false, error: data.error ?? "Could not update the status. Please try again." };
+  }
   revalidatePath("/admin/applications");
+  return { ok: true, emailError: data.emailError };
+}
+
+export type UpdateInterviewResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+export async function updateApplicationInterview(
+  id: string,
+  interviewAtIso: string
+): Promise<UpdateInterviewResult> {
+  await verifyAdminSession();
+  const headers = await authHeaders();
+  const res = await fetch(
+    `${backendBase()}/api/admin/applications/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ interview_at: interviewAtIso }),
+    }
+  );
+  const data = (await res.json().catch(() => ({}))) as { error?: string };
+  if (!res.ok) {
+    return { ok: false, error: data.error ?? "Could not update the interview time." };
+  }
+  revalidatePath("/admin/applications");
+  return { ok: true };
 }

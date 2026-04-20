@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { EditorialItem } from "@/lib/types";
 
 export function VideoShowcase({ items }: { items: EditorialItem[] }) {
@@ -30,14 +31,25 @@ export function VideoShowcase({ items }: { items: EditorialItem[] }) {
             Featured campaign films and motion work will appear here.
           </p>
         ) : (
-          <div className="film-grid reveal">
+          <div
+            className="film-grid reveal"
+            data-layout={items.length === 1 ? "single" : "multi"}
+            style={
+              {
+                "--film-cols-lg": Math.min(items.length, 4),
+                "--film-cols-sm": Math.min(items.length, 2),
+              } as CSSProperties
+            }
+          >
             {items.map((item, i) => (
               <div className="film-card" key={item.id ?? `${item.title}-${i}`}>
                 <video
                   controls
                   playsInline
                   preload="metadata"
-                  poster={item.image_url}
+                  {...(item.image_url
+                    ? { poster: item.image_url }
+                    : {})}
                   className="film-video"
                 >
                   <source src={item.video_url!} />
