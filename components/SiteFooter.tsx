@@ -1,6 +1,100 @@
+ "use client";
+
 import { LogoSvg } from "@/components/LogoSvg";
+import { PwaInstallButton } from "@/components/PwaInstallButton";
+import { useEffect, useMemo, useState } from "react";
+
+type FooterModalId =
+  | "model-scouting"
+  | "development-programs"
+  | "brand-partnerships"
+  | "event-casting"
+  | "content-production"
+  | "privacy-policy"
+  | "terms-of-service"
+  | "cookie-settings";
+
+type FooterModalContent = {
+  title: string;
+  body: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+};
+
+const FOOTER_MODALS: Record<FooterModalId, FooterModalContent> = {
+  "model-scouting": {
+    title: "Model Scouting",
+    body: "We identify emerging talent through digital review, live evaluations, and market-fit analysis. Submit your profile and our scouting team will review your look, movement, and long-term potential.",
+    ctaLabel: "Back To Apply Form",
+    ctaHref: "#apply",
+  },
+  "development-programs": {
+    title: "Development Programs",
+    body: "Our development track combines runway coaching, posing, personal branding, and industry readiness to move talent from discovery to placement with confidence.",
+    ctaLabel: "Back To Apply Form",
+    ctaHref: "#apply",
+  },
+  "brand-partnerships": {
+    title: "Brand Partnerships",
+    body: "We connect fashion and lifestyle brands with curated talent for campaigns, ambassador programs, and strategic collaborations designed for measurable impact.",
+    ctaLabel: "Contact Partnerships",
+    ctaHref: "mailto:onyxxclub@gmail.com",
+  },
+  "event-casting": {
+    title: "Event Casting",
+    body: "From runway shows to private brand activations, we provide casting support, shortlist management, and on-site coordination tailored to your event goals.",
+    ctaLabel: "Request Casting Support",
+    ctaHref: "mailto:onyxxclub@gmail.com",
+  },
+  "content-production": {
+    title: "Content Production",
+    body: "Our creative team supports editorials, campaign shoots, and social-first content with talent direction and production-ready execution.",
+    ctaLabel: "Discuss A Project",
+    ctaHref: "mailto:onyxxclub@gmail.com",
+  },
+  "privacy-policy": {
+    title: "Privacy Policy",
+    body: "At ONYXX Club, your privacy is a priority. We are committed to protecting your personal information and ensuring transparency in how your data is collected, used, and safeguarded. We may collect personal details such as your name, contact information, portfolio submissions, and other relevant data strictly for purposes including membership management, talent development, communications, and service improvement. All information provided is handled with strict confidentiality and will not be sold, rented, or shared with third parties without your consent, except where required by law or necessary for operational purposes (such as collaborations or bookings).By engaging with ONYXX Club, you agree to the collection and use of information in accordance with this policy. We implement appropriate security measures to protect your data from unauthorized access or disclosure.",
+    ctaLabel: "Back To Apply Form",
+    ctaHref: "#apply",
+  },
+  "terms-of-service": {
+    title: "Terms Of Service",
+    body: "By accessing or becoming a member of ONYXX Club, you agree to uphold the standards, values, and operational guidelines of the agency. Members are expected to maintain professionalism, integrity, and respect in all engagements—both within and outside the club. ONYXX Club reserves the right to review, approve, or decline participation in projects, events, or collaborations to maintain brand quality and reputation. All content, branding, and materials associated with ONYXX Club remain the intellectual property of the organization unless otherwise stated. Unauthorized use, reproduction, or distribution is prohibited. ONYXX Club also reserves the right to update, modify, or terminate services or memberships where necessary, ensuring the continuous growth and exclusivity of the brand.",
+    ctaLabel: "Back To Apply Form",
+    ctaHref: "#apply",
+  },
+  "cookie-settings": {
+    title: "Cookie Settings",
+    body: "ONYXX Club uses cookies and similar technologies to enhance user experience, analyze website performance, and deliver tailored content. Cookies help us understand how visitors interact with our platform, allowing us to improve functionality, design, and overall user experience. These may include essential cookies for site operation and optional cookies for analytics and personalization. Users have the option to manage or disable cookies through their browser settings. Please note that disabling certain cookies may affect the functionality of the website. By continuing to use our platform, you consent to the use of cookies in accordance with this policy.",
+    ctaLabel: "Update Cookie Preferences",
+    ctaHref: "mailto:onyxxclub@gmail.com?subject=Cookie%20Preference%20Request",
+  },
+};
 
 export function SiteFooter() {
+  const [activeModal, setActiveModal] = useState<FooterModalId | null>(null);
+  const modalContent = useMemo(
+    () => (activeModal ? FOOTER_MODALS[activeModal] : null),
+    [activeModal]
+  );
+
+  useEffect(() => {
+    function onEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") setActiveModal(null);
+    }
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, []);
+
+  function openModal(id: FooterModalId) {
+    setActiveModal(id);
+  }
+
+  function closeModal() {
+    setActiveModal(null);
+  }
+
   return (
     <footer className="site-footer">
       <div className="runway-strip" />
@@ -16,7 +110,7 @@ export function SiteFooter() {
               <a href="#" aria-label="Instagram">
                 <i className="fab fa-instagram" aria-hidden />
               </a>
-              <a href="#" aria-label="Twitter">
+              <a href="#" aria-label="X">
                 <i className="fab fa-x-twitter" aria-hidden />
               </a>
               <a href="#" aria-label="LinkedIn">
@@ -54,19 +148,41 @@ export function SiteFooter() {
             <h4>Services</h4>
             <ul>
               <li>
-                <a href="#">Model Scouting</a>
+                <button type="button" className="footer-link-button" onClick={() => openModal("model-scouting")}>
+                  Model Scouting
+                </button>
               </li>
               <li>
-                <a href="#">Development Programs</a>
+                <button
+                  type="button"
+                  className="footer-link-button"
+                  onClick={() => openModal("development-programs")}
+                >
+                  Development Programs
+                </button>
               </li>
               <li>
-                <a href="#">Brand Partnerships</a>
+                <button
+                  type="button"
+                  className="footer-link-button"
+                  onClick={() => openModal("brand-partnerships")}
+                >
+                  Brand Partnerships
+                </button>
               </li>
               <li>
-                <a href="#">Event Casting</a>
+                <button type="button" className="footer-link-button" onClick={() => openModal("event-casting")}>
+                  Event Casting
+                </button>
               </li>
               <li>
-                <a href="#">Content Production</a>
+                <button
+                  type="button"
+                  className="footer-link-button"
+                  onClick={() => openModal("content-production")}
+                >
+                  Content Production
+                </button>
               </li>
             </ul>
           </div>
@@ -74,19 +190,10 @@ export function SiteFooter() {
             <h4>Contact</h4>
             <ul>
               <li>
-                <a href="#">New York, NY</a>
+                <a href="#">Jos, Nigeria</a>
               </li>
               <li>
-                <a href="#">London, UK</a>
-              </li>
-              <li>
-                <a href="#">Milan, Italy</a>
-              </li>
-              <li>
-                <a href="#">Paris, France</a>
-              </li>
-              <li>
-                <a href="mailto:hello@onyxxclub.com">hello@onyxxclub.com</a>
+                <a href="mailto:onyxxclub@gmail.com">onyxxclub@gmail.com</a>
               </li>
             </ul>
           </div>
@@ -98,6 +205,7 @@ export function SiteFooter() {
           <a href="#models" className="footer-btn footer-btn-outline">
             <i className="fas fa-eye" aria-hidden /> View Portfolio
           </a>
+          <PwaInstallButton />
           <a href="mailto:hello@onyxxclub.com" className="footer-btn footer-btn-ghost">
             <i className="fas fa-envelope" aria-hidden /> Contact Us
           </a>
@@ -110,12 +218,46 @@ export function SiteFooter() {
             ONYXX CLUB. All rights reserved.
           </p>
           <div className="footer-bottom-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Cookie Settings</a>
+            <button type="button" className="footer-link-button" onClick={() => openModal("privacy-policy")}>
+              Privacy Policy
+            </button>
+            <button type="button" className="footer-link-button" onClick={() => openModal("terms-of-service")}>
+              Terms of Service
+            </button>
+            <button type="button" className="footer-link-button" onClick={() => openModal("cookie-settings")}>
+              Cookie Settings
+            </button>
           </div>
         </div>
       </div>
+
+      {modalContent ? (
+        <div className="footer-modal-overlay" role="presentation" onClick={closeModal}>
+          <div
+            className="footer-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="footer-modal-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button type="button" className="footer-modal-close" aria-label="Close" onClick={closeModal}>
+              <i className="fas fa-xmark" aria-hidden />
+            </button>
+            <h3 id="footer-modal-title">{modalContent.title}</h3>
+            <p>{modalContent.body}</p>
+            <div className="footer-modal-actions">
+              {modalContent.ctaLabel && modalContent.ctaHref ? (
+                <a href={modalContent.ctaHref} className="footer-btn footer-btn-gold" onClick={closeModal}>
+                  {modalContent.ctaLabel}
+                </a>
+              ) : null}
+              <button type="button" className="footer-btn footer-btn-outline" onClick={closeModal}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </footer>
   );
 }

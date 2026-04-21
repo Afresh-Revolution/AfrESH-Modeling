@@ -1173,6 +1173,21 @@ img {
 .footer-col ul li a:hover {
   color: var(--gold);
 }
+.footer-link-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: color 0.3s;
+  text-align: left;
+}
+.footer-link-button:hover {
+  color: var(--gold);
+}
 .footer-buttons {
   display: flex;
   gap: 1rem;
@@ -1253,6 +1268,88 @@ img {
 }
 .footer-bottom-links a:hover {
   color: var(--gold);
+}
+.footer-bottom-links .footer-link-button {
+  font-size: 0.8rem;
+}
+
+.footer-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.68);
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.footer-modal {
+  width: min(640px, 100%);
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(180deg, #181818 0%, #0e0e0e 100%);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  padding: 1.25rem 1.25rem 1.1rem;
+  position: relative;
+}
+
+.footer-modal h3 {
+  margin: 0 2.2rem 0.6rem 0;
+  font-size: 1.1rem;
+  letter-spacing: 0.04em;
+}
+
+.footer-modal p {
+  margin: 0;
+  color: var(--fg-muted);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.footer-modal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.footer-modal-close:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+.footer-modal-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.pwa-toast {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1300;
+  border-radius: 10px;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(201, 168, 76, 0.35);
+  background: rgba(16, 24, 16, 0.96);
+  color: var(--gold-light);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.4);
+}
+
+.pwa-toast-success {
+  border-color: rgba(201, 168, 76, 0.4);
 }
 
 /* ===== Toast ===== */
@@ -1514,5 +1611,12 @@ img {
   }
   .footer-btn {
     justify-content: center;
+  }
+  .pwa-toast {
+    right: 0.75rem;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    justify-content: center;
+    text-align: center;
   }
 }
