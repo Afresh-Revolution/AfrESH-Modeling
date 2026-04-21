@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-type InstallPlatform = "ios" | "other";
+type InstallPlatform = "ios" | "firefox" | "chromium" | "other";
 
 type DeferredInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -20,6 +20,10 @@ function detectPlatform(): InstallPlatform {
   const ua = navigator.userAgent.toLowerCase();
   const isIOS = /iphone|ipad|ipod/.test(ua);
   if (isIOS) return "ios";
+  if (ua.includes("firefox")) return "firefox";
+  if (ua.includes("edg/") || ua.includes("chrome/") || ua.includes("opr/") || ua.includes("brave")) {
+    return "chromium";
+  }
   return "other";
 }
 
@@ -51,7 +55,7 @@ export function PwaInstallButton() {
       setDeferredPrompt(null);
       window.__onyxxDeferredPrompt = undefined;
       setShowHelp(false);
-      window.setTimeout(() => setInstalled(false), 3500);
+      window.setTimeout(() => setInstalled(false), 5000);
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
@@ -66,7 +70,13 @@ export function PwaInstallButton() {
     if (platform === "ios") {
       return "On iPhone/iPad: open this site in Safari, tap Share, then choose 'Add to Home Screen'. Apple does not allow one-tap instant PWA install from a website button.";
     }
-    return "On Windows desktop, use Chrome or Edge over HTTPS. If no prompt appears, open browser menu and choose 'Install app' (or 'Apps > Install this site as an app').";
+    if (platform === "firefox") {
+      return "Firefox does not support one-click PWA install prompts. Use Edge/Chrome/Opera for native app-style install.";
+    }
+    if (platform === "chromium") {
+      return "If the install prompt did not appear yet, open browser menu and choose 'Install app' (or 'Apps > Install this site as an app').";
+    }
+    return "This browser does not expose direct PWA install prompt. Use a Chromium browser (Edge/Chrome/Opera/Brave) for one-click install.";
   }, [platform]);
 
   async function onInstallClick() {

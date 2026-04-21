@@ -5,18 +5,35 @@ import { useEffect, useState } from "react";
 const SW_URL = "/sw.js";
 
 export function PwaManager() {
-  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [updateState, setUpdateState] = useState<{
+    message: string;
+    percent: number;
+  } | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
     let updateTimer: number | null = null;
+    let progressTimer: number | null = null;
     let refreshing = false;
+
+    const startInstallingProgress = () => {
+      setUpdateState({ message: "Installing latest update...", percent: 15 });
+      if (progressTimer) window.clearInterval(progressTimer);
+      progressTimer = window.setInterval(() => {
+        setUpdateState((prev) => {
+          if (!prev) return prev;
+          if (prev.percent >= 90) return prev;
+          return { ...prev, percent: Math.min(90, prev.percent + 8) };
+        });
+      }, 450);
+    };
 
     navigator.serviceWorker
       .register(SW_URL)
       .then((registration) => {
         if (registration.waiting) {
+          startInstallingProgress();
           registration.waiting.postMessage({ type: "SKIP_WAITING" });
         }
 
@@ -25,7 +42,7 @@ export function PwaManager() {
           if (!installing) return;
           installing.addEventListener("statechange", () => {
             if (installing.state === "installed" && navigator.serviceWorker.controller) {
-              setUpdateMessage("Installing latest update...");
+              startInstallingProgress();
               registration.waiting?.postMessage({ type: "SKIP_WAITING" });
             }
           });
@@ -40,7 +57,8 @@ export function PwaManager() {
     const onControllerChange = () => {
       if (refreshing) return;
       refreshing = true;
-      setUpdateMessage("Update installed. Reloading...");
+      if (progressTimer) window.clearInterval(progressTimer);
+      setUpdateState({ message: "Update installed. Reloading...", percent: 100 });
       window.setTimeout(() => window.location.reload(), 1200);
     };
 
@@ -49,14 +67,23 @@ export function PwaManager() {
     return () => {
       navigator.serviceWorker.removeEventListener("controllerchange", onControllerChange);
       if (updateTimer) window.clearInterval(updateTimer);
+      if (progressTimer) window.clearInterval(progressTimer);
     };
   }, []);
 
-  if (!updateMessage) return null;
+  if (!updateState) return null;
 
   return (
-    <div className="pwa-toast pwa-toast-success" role="status" aria-live="polite">
-      <i className="fas fa-rotate" aria-hidden /> {updateMessage}
+    <div className="pwa-update-card" role="status" aria-live="polite">
+      <div className="pwa-update-row">
+        <span className="pwa-update-spinner" aria-hidden="true" />
+        <span className="pwa-update-text">
+          {updateState.message} {updateState.percent}%
+        </span>
+      </div>
+      <div className="pwa-update-track">
+        <div className="pwa-update-bar" style={{ width: `${updateState.percent}%` }} />
+      </div>
     </div>
   );
 }
