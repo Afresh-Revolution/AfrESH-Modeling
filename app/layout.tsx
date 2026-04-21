@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     "Where elegance meets excellence. Data-driven talent development and placement.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: "/pwa-logo.JPG",
+    apple: "/pwa-logo.JPG",
   },
 };
 
