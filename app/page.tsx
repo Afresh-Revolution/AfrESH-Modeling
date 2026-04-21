@@ -2,6 +2,8 @@ import { ApplyForm } from "@/components/ApplyForm";
 import { DataCharts } from "@/components/DataCharts";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { HeroSection } from "@/components/HeroSection";
+import { LandingLiveUpdates } from "@/components/LandingLiveUpdates";
+import { LandingPullToRefresh } from "@/components/LandingPullToRefresh";
 import { ModelsCarousel } from "@/components/ModelsCarousel";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteNav } from "@/components/SiteNav";
@@ -27,6 +29,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <LandingLiveUpdates />
+      <LandingPullToRefresh />
       <SiteNav />
       <HeroSection />
       <StatsBar metrics={metrics} />

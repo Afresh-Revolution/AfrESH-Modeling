@@ -6,6 +6,7 @@ import {
   parseAdminUploadError,
   xhrMultipartWithProgress,
 } from "@/lib/adminMultipartUpload";
+import { emitContentUpdate } from "@/lib/contentSync";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -176,6 +177,7 @@ function RowEditor({ item }: { item: EditorialItem }) {
           });
           setUpload({ kind: "idle" });
           router.refresh();
+          emitContentUpdate("editorial-update");
           form.reset();
         } catch (err) {
           setUpload({
@@ -355,6 +357,7 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
               });
               setUpload({ kind: "idle" });
               router.refresh();
+              emitContentUpdate("editorial-create");
               form.reset();
             } catch (err) {
               setUpload({
@@ -515,6 +518,7 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                             throw new Error(parseAdminUploadError(t));
                           }
                           router.refresh();
+                          emitContentUpdate("editorial-delete");
                         } catch (err) {
                           setUpload({
                             kind: "error",

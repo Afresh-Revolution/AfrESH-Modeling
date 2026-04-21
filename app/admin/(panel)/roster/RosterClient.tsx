@@ -6,6 +6,7 @@ import {
   parseAdminUploadError,
   xhrMultipartWithProgress,
 } from "@/lib/adminMultipartUpload";
+import { emitContentUpdate } from "@/lib/contentSync";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -43,6 +44,7 @@ function RowUpdateForm({ m }: { m: RosterRow }) {
           });
           setUpload({ kind: "idle" });
           router.refresh();
+          emitContentUpdate("roster-update");
         } catch (err) {
           setUpload({
             kind: "error",
@@ -138,6 +140,7 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
               setCreateUpload({ kind: "idle" });
               form.reset();
               router.refresh();
+              emitContentUpdate("roster-create");
             } catch (err) {
               setCreateUpload({
                 kind: "error",
@@ -255,6 +258,7 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
                             throw new Error(parseAdminUploadError(t));
                           }
                           router.refresh();
+                          emitContentUpdate("roster-delete");
                         } catch (err) {
                           setDeleteError(err instanceof Error ? err.message : "Remove failed");
                         } finally {

@@ -1,6 +1,7 @@
 import styles from "../admin.module.scss";
 import Link from "next/link";
 import { adminLogoutAction } from "../actions";
+import { AdminHeaderControls } from "./AdminHeaderControls";
 
 export default function AdminPanelLayout({
   children,
@@ -18,7 +19,7 @@ export default function AdminPanelLayout({
           <Link href="/admin/editorial">Campaigns</Link>
           <Link href="/admin/editorial#film">Film</Link>
           <Link href="/admin/metrics">Metrics</Link>
-          <Link href="/">View site</Link>
+          <AdminHeaderControls />
           <form action={adminLogoutAction}>
             <button type="submit" className={`${styles.btn} ${styles.btnGhost}`}>
               Sign out
