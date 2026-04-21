@@ -1,4 +1,5 @@
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { PwaManager } from "@/components/PwaManager";
 import type { Metadata } from "next";
 import { Nunito, Outfit } from "next/font/google";
 import "./globals.scss";
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
   title: "ONYXX CLUB — Modeling Agency",
   description:
     "Where elegance meets excellence. Data-driven talent development and placement.",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
@@ -39,6 +41,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <PwaManager />
         <ScrollReveal />
         <div className="main-shell">{children}</div>
       </body>
