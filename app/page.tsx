@@ -8,14 +8,15 @@ import { SiteNav } from "@/components/SiteNav";
 import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 import { StatsBar } from "@/components/StatsBar";
 import { VideoShowcase } from "@/components/VideoShowcase";
-import { fetchEditorial, fetchRoster } from "@/lib/data";
+import { fetchEditorial, fetchRoster, fetchSiteMetrics } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [roster, editorial] = await Promise.all([
+  const [roster, editorial, metrics] = await Promise.all([
     fetchRoster(),
     fetchEditorial(),
+    fetchSiteMetrics(),
   ]);
   const filmItems = editorial.filter(
     (e) => typeof e.video_url === "string" && e.video_url.length > 0,
@@ -28,7 +29,7 @@ export default async function HomePage() {
     <>
       <SiteNav />
       <HeroSection />
-      <StatsBar />
+      <StatsBar metrics={metrics} />
 
       <VideoShowcase items={filmItems} />
 
@@ -159,18 +160,18 @@ export default async function HomePage() {
               </p>
             </div>
           </div>
-          <DataCharts />
+          <DataCharts metrics={metrics} />
           <div className="key-metrics reveal">
             <div className="metric-card">
-              <div className="metric-value">$4.2M</div>
+              <div className="metric-value">{metrics.total_earnings_display}</div>
               <div className="metric-label">Total Earnings Generated</div>
             </div>
             <div className="metric-card">
-              <div className="metric-value">87</div>
+              <div className="metric-value">{metrics.brand_partnerships.toLocaleString()}</div>
               <div className="metric-label">Brand Partnerships Active</div>
             </div>
             <div className="metric-card">
-              <div className="metric-value">32</div>
+              <div className="metric-value">{metrics.countries_placements.toLocaleString()}</div>
               <div className="metric-label">Countries With Placements</div>
             </div>
           </div>

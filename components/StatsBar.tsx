@@ -1,13 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import type { SiteMetrics } from "@/lib/siteMetrics";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-const STATS = [
-  { target: 250, label: "Models Represented", suffix: "plus" as const },
-  { target: 1200, label: "Campaigns Delivered", suffix: "plus" as const },
-  { target: 12, label: "Years of Excellence", suffix: "plus" as const },
-  { target: 94, label: "Placement rate", suffix: "percent" as const },
-];
+type StatDef = { target: number; label: string; suffix: "plus" | "percent" };
 
 function formatFinal(target: number, suffix: "plus" | "percent") {
   if (suffix === "percent") return `${target}%`;
@@ -47,7 +43,17 @@ function StatNumber({
   return <div className="stat-number">{display}</div>;
 }
 
-export function StatsBar() {
+function statsFromMetrics(m: SiteMetrics): StatDef[] {
+  return [
+    { target: m.models_represented, label: "Models Represented", suffix: "plus" },
+    { target: m.campaigns_delivered, label: "Campaigns Delivered", suffix: "plus" },
+    { target: m.years_excellence, label: "Years of Excellence", suffix: "plus" },
+    { target: m.placement_rate_percent, label: "Placement rate", suffix: "percent" },
+  ];
+}
+
+export function StatsBar({ metrics }: { metrics: SiteMetrics }) {
+  const stats = useMemo(() => statsFromMetrics(metrics), [metrics]);
   const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(false);
 
@@ -67,7 +73,7 @@ export function StatsBar() {
   return (
     <section className="stats-bar reveal" ref={ref}>
       <div className="stats-grid">
-        {STATS.map((s) => (
+        {stats.map((s) => (
           <div className="stat-item" key={s.label}>
             <StatNumber target={s.target} suffix={s.suffix} active={active} />
             <div className="stat-label">{s.label}</div>
