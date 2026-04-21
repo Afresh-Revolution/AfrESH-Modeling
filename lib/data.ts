@@ -1,5 +1,10 @@
 import { getPgPool } from "@/lib/db/postgres";
 import { FALLBACK_EDITORIAL, FALLBACK_ROSTER } from "./roster-fallback";
+import {
+  DEFAULT_SITE_METRICS,
+  parseSiteMetricsRow,
+  type SiteMetrics,
+} from "./siteMetrics";
 import { createSupabaseAnon } from "./supabase";
 import type { EditorialItem, RosterModel } from "./types";
 
@@ -160,4 +165,47 @@ export async function fetchEditorial(): Promise<EditorialItem[]> {
   }
 
   return FALLBACK_EDITORIAL.map((r) => coerceEditorialRow(r));
+}
+
+export async function fetchSiteMetrics(): Promise<SiteMetrics> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      const { rows } = await pool.query(
+        `SELECT total_earnings_display, brand_partnerships, countries_placements,
+                models_represented, campaigns_delivered, years_excellence, placement_rate_percent,
+                category_distribution, placement_by_year
+         FROM site_metrics WHERE id = 1`
+      );
+      if (rows.length) {
+        return parseSiteMetricsRow(rows[0] as Record<string, unknown>);
+      }
+    } catch (e) {
+      console.error("[fetchSiteMetrics] postgres:", e);
+    }
+  }
+
+  const supabase = createSupabaseAnon();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("site_metrics")
+      .select(
+        "total_earnings_display,brand_partnerships,countries_placements,models_represented,campaigns_delivered,years_excellence,placement_rate_percent,category_distribution,placement_by_year"
+      )
+      .eq("id", 1)
+      .maybeSingle();
+
+    if (!error && data) {
+      return parseSiteMetricsRow(data as Record<string, unknown>);
+    }
+  }
+
+  const backend = await tryFetchFromBackend<{ metrics?: Record<string, unknown> }>(
+    "/api/metrics"
+  );
+  if (backend?.metrics && typeof backend.metrics === "object") {
+    return parseSiteMetricsRow(backend.metrics);
+  }
+
+  return DEFAULT_SITE_METRICS;
 }

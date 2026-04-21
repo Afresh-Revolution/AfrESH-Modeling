@@ -1,5 +1,6 @@
 "use server";
 
+import type { SiteMetrics } from "@/lib/siteMetrics";
 import {
   getAdminAccessToken,
   verifyAdminSession,
@@ -105,6 +106,43 @@ export async function fetchEditorialJson() {
   return res.json() as Promise<{
     editorial: Record<string, unknown>[];
   }>;
+}
+
+export async function fetchSiteMetricsForAdmin() {
+  const res = await adminFetch("/api/admin/site-metrics");
+  if (!res.ok) {
+    const raw = await res.text();
+    let detail = raw.slice(0, 300);
+    try {
+      const j = JSON.parse(raw) as { error?: string; message?: string };
+      detail = (j.error ?? j.message ?? detail).slice(0, 300);
+    } catch {
+      /* keep truncated body */
+    }
+    throw new Error(
+      `We couldn't load site metrics (HTTP ${res.status}). ${detail}` +
+        (res.status === 404
+          ? " If the API is outdated, redeploy the backend so GET /api/admin/site-metrics exists."
+          : res.status === 503
+            ? " Set JWT_SECRET on the API host."
+            : "")
+    );
+  }
+  return res.json() as Promise<{ metrics: Record<string, unknown> }>;
+}
+
+export async function updateSiteMetricsAction(metrics: SiteMetrics) {
+  const res = await adminFetch("/api/admin/site-metrics", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(metrics),
+  });
+  if (!res.ok) {
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(j.error ?? "Could not save metrics.");
+  }
+  revalidatePath("/");
+  revalidatePath("/admin/metrics");
 }
 
 export async function createRosterEntry(formData: FormData) {

@@ -37,6 +37,12 @@ export default function AdminHomePage() {
             </Link>{" "}
             — open the film section on this page
           </li>
+          <li>
+            <Link href="/admin/metrics" style={{ color: "#c9a84c" }}>
+              Metrics
+            </Link>{" "}
+            — homepage stats, key figures, and chart data
+          </li>
         </ul>
       </div>
     </main>

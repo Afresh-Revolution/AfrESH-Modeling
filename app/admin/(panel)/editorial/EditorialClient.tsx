@@ -1,5 +1,11 @@
 "use client";
 
+import { AdminUploadProgress } from "@/app/admin/AdminUploadProgress";
+import {
+  type AdminUploadState,
+  parseAdminUploadError,
+  xhrMultipartWithProgress,
+} from "@/lib/adminMultipartUpload";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -12,11 +18,6 @@ type EditorialItem = {
   video_url?: string | null;
   sort_order?: number | null;
 };
-
-type UploadState =
-  | { kind: "idle" }
-  | { kind: "uploading"; percent: number }
-  | { kind: "error"; message: string };
 
 type CloudinarySignature = {
   cloudName: string;
@@ -41,41 +42,6 @@ function getNonEmptyFile(fd: FormData, key: string): File | null {
 function deleteEmptyFileField(fd: FormData, key: string) {
   const v = fd.get(key);
   if (v instanceof File && v.size <= 0) fd.delete(key);
-}
-
-function parseErr(text: string): string {
-  try {
-    const j = JSON.parse(text) as { error?: string; message?: string };
-    return j.error || j.message || text || "Upload failed";
-  } catch {
-    return text || "Upload failed";
-  }
-}
-
-function xhrMultipart(opts: {
-  method: "POST" | "PATCH";
-  url: string;
-  formData: FormData;
-  onProgress: (percent: number) => void;
-}): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open(opts.method, opts.url);
-
-    xhr.upload.onprogress = (e) => {
-      if (!e.lengthComputable) return;
-      const p = Math.max(0, Math.min(100, Math.round((e.loaded / e.total) * 100)));
-      opts.onProgress(p);
-    };
-
-    xhr.onerror = () => reject(new Error("Network error"));
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) return resolve();
-      reject(new Error(parseErr(xhr.responseText)));
-    };
-
-    xhr.send(opts.formData);
-  });
 }
 
 async function fetchCloudinarySignature(
@@ -126,7 +92,7 @@ function xhrCloudinaryUpload(opts: {
     xhr.onerror = () => reject(new Error("Network error"));
     xhr.onload = () => {
       if (xhr.status < 200 || xhr.status >= 300) {
-        return reject(new Error(parseErr(xhr.responseText)));
+        return reject(new Error(parseAdminUploadError(xhr.responseText)));
       }
       try {
         const j = JSON.parse(xhr.responseText) as { secure_url?: string };
@@ -144,7 +110,7 @@ function xhrCloudinaryUpload(opts: {
 function RowEditor({ item }: { item: EditorialItem }) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
-  const [upload, setUpload] = useState<UploadState>({ kind: "idle" });
+  const [upload, setUpload] = useState<AdminUploadState>({ kind: "idle" });
 
   const id = String(item.id);
 
@@ -202,7 +168,7 @@ function RowEditor({ item }: { item: EditorialItem }) {
             }
           }
 
-          await xhrMultipart({
+          await xhrMultipartWithProgress({
             method: "PATCH",
             url: `/api/admin/editorial/${encodeURIComponent(id)}`,
             formData: fd,
@@ -277,21 +243,7 @@ function RowEditor({ item }: { item: EditorialItem }) {
           </label>
         ) : null}
 
-        {upload.kind === "uploading" ? (
-          <div className={styles.progressWrap} aria-live="polite">
-            <div className={styles.progressRow}>
-              <span className={styles.spinner} aria-hidden="true" />
-              <span style={{ fontSize: "0.8rem", color: "#a09888" }}>
-                Uploading… {upload.percent}%
-              </span>
-            </div>
-            <div className={styles.progressTrack}>
-              <div className={styles.progressBar} style={{ width: `${upload.percent}%` }} />
-            </div>
-          </div>
-        ) : upload.kind === "error" ? (
-          <div className={styles.inlineError}>{upload.message}</div>
-        ) : null}
+        <AdminUploadProgress state={upload} />
       </div>
 
       <button
@@ -309,7 +261,7 @@ function RowEditor({ item }: { item: EditorialItem }) {
 export default function EditorialClient({ initialEditorial }: { initialEditorial: EditorialItem[] }) {
   const router = useRouter();
   const [creating, setCreating] = useState(false);
-  const [upload, setUpload] = useState<UploadState>({ kind: "idle" });
+  const [upload, setUpload] = useState<AdminUploadState>({ kind: "idle" });
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const editorial = useMemo(() => initialEditorial ?? [], [initialEditorial]);
@@ -395,7 +347,7 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                 }
               }
 
-              await xhrMultipart({
+              await xhrMultipartWithProgress({
                 method: "POST",
                 url: "/api/admin/editorial",
                 formData: fd,
@@ -494,23 +446,7 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
             </div>
           </div>
 
-          {upload.kind === "uploading" ? (
-            <div className={styles.progressWrap} aria-live="polite" style={{ marginTop: "0.75rem" }}>
-              <div className={styles.progressRow}>
-                <span className={styles.spinner} aria-hidden="true" />
-                <span style={{ fontSize: "0.8rem", color: "#a09888" }}>
-                  Uploading… {upload.percent}%
-                </span>
-              </div>
-              <div className={styles.progressTrack}>
-                <div className={styles.progressBar} style={{ width: `${upload.percent}%` }} />
-              </div>
-            </div>
-          ) : upload.kind === "error" ? (
-            <div className={styles.inlineError} style={{ marginTop: "0.75rem" }}>
-              {upload.message}
-            </div>
-          ) : null}
+          <AdminUploadProgress state={upload} style={{ marginTop: "0.75rem" }} />
         </form>
       </div>
 
@@ -576,7 +512,7 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                           );
                           if (!res.ok) {
                             const t = await res.text();
-                            throw new Error(parseErr(t));
+                            throw new Error(parseAdminUploadError(t));
                           }
                           router.refresh();
                         } catch (err) {
