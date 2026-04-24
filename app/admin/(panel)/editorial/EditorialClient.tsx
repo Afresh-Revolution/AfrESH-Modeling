@@ -23,10 +23,11 @@ type EditorialItem = {
 type CloudinarySignature = {
   cloudName: string;
   apiKey: string;
-  timestamp: number;
-  signature: string;
+  timestamp?: number;
+  signature?: string;
   folder: string;
   resource_type: "image" | "video" | "raw";
+  upload_preset?: string;
 };
 
 function isNonEmptyString(v: FormDataEntryValue | null): v is string {
@@ -49,17 +50,18 @@ async function fetchCloudinarySignature(
   resource_type: "image" | "video" | "raw"
 ): Promise<CloudinarySignature> {
   const res = await fetch(
-    `/api/admin/editorial/upload-signature?resource_type=${encodeURIComponent(
-      resource_type
-    )}`,
+    `/api/admin/editorial/upload-signature?resource_type=${encodeURIComponent(resource_type)}&unsigned=true`,
     { cache: "no-store" }
   );
   const j = (await res.json().catch(() => ({}))) as Partial<CloudinarySignature> & {
     error?: string;
   };
   if (!res.ok) throw new Error(j.error ?? "Could not get upload signature");
-  if (!j.cloudName || !j.apiKey || !j.signature || !j.timestamp || !j.folder || !j.resource_type) {
+  if (!j.cloudName || !j.folder || !j.resource_type) {
     throw new Error("Invalid upload signature response");
+  }
+  if (!j.upload_preset && (!j.apiKey || !j.signature || !j.timestamp)) {
+    throw new Error("Invalid Cloudinary auth response");
   }
   return j as CloudinarySignature;
 }
@@ -76,10 +78,17 @@ function xhrCloudinaryUpload(opts: {
 
     const fd = new FormData();
     fd.set("file", opts.file);
-    fd.set("api_key", opts.sig.apiKey);
-    fd.set("timestamp", String(opts.sig.timestamp));
-    fd.set("signature", opts.sig.signature);
     fd.set("folder", opts.sig.folder);
+    if (opts.sig.upload_preset) {
+      fd.set("upload_preset", opts.sig.upload_preset);
+    } else {
+      if (!opts.sig.apiKey || !opts.sig.signature || !opts.sig.timestamp) {
+        return reject(new Error("Missing Cloudinary signed upload fields"));
+      }
+      fd.set("api_key", opts.sig.apiKey);
+      fd.set("timestamp", String(opts.sig.timestamp));
+      fd.set("signature", opts.sig.signature);
+    }
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", endpoint);

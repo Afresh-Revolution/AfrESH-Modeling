@@ -5,8 +5,16 @@ export type AdminUploadState =
 
 export function parseAdminUploadError(text: string): string {
   try {
-    const j = JSON.parse(text) as { error?: string; message?: string };
-    return j.error || j.message || text || "Upload failed";
+    const j = JSON.parse(text) as {
+      error?: string | { message?: string };
+      message?: string;
+    };
+    if (typeof j.error === "string" && j.error.trim()) return j.error;
+    if (typeof j.error === "object" && typeof j.error?.message === "string" && j.error.message.trim()) {
+      return j.error.message;
+    }
+    if (typeof j.message === "string" && j.message.trim()) return j.message;
+    return text || "Upload failed";
   } catch {
     return text || "Upload failed";
   }
