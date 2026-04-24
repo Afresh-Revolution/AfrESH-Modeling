@@ -23,11 +23,17 @@ type EditorialItem = {
 type CloudinarySignature = {
   cloudName: string;
   apiKey: string;
-  timestamp?: number;
-  signature?: string;
+  timestamp: number;
+  signature: string;
   folder: string;
   resource_type: "image" | "video" | "raw";
-  upload_preset?: string;
+};
+
+type CloudinarySignatureResponse = Partial<CloudinarySignature> & {
+  error?: string;
+  cloud_name?: string;
+  api_key?: string;
+  resourceType?: "image" | "video" | "raw";
 };
 
 function isNonEmptyString(v: FormDataEntryValue | null): v is string {
@@ -49,21 +55,36 @@ function deleteEmptyFileField(fd: FormData, key: string) {
 async function fetchCloudinarySignature(
   resource_type: "image" | "video" | "raw"
 ): Promise<CloudinarySignature> {
-  const res = await fetch(
-    `/api/admin/editorial/upload-signature?resource_type=${encodeURIComponent(resource_type)}&unsigned=true`,
-    { cache: "no-store" }
-  );
-  const j = (await res.json().catch(() => ({}))) as Partial<CloudinarySignature> & {
-    error?: string;
+  const q = new URLSearchParams({ resource_type });
+  const res = await fetch(`/api/admin/editorial/upload-signature?${q.toString()}`, {
+    cache: "no-store",
+  });
+  const raw = (await res.json().catch(() => ({}))) as CloudinarySignatureResponse;
+  if (!res.ok) throw new Error(raw.error ?? "Could not get upload signature");
+
+  const normalized: CloudinarySignature = {
+    cloudName: raw.cloudName ?? raw.cloud_name ?? "",
+    apiKey: raw.apiKey ?? raw.api_key ?? "",
+    timestamp:
+      typeof raw.timestamp === "number"
+        ? raw.timestamp
+        : Number(raw.timestamp ?? Number.NaN),
+    signature: String(raw.signature ?? ""),
+    folder: raw.folder ?? "",
+    resource_type: raw.resource_type ?? raw.resourceType ?? resource_type,
   };
-  if (!res.ok) throw new Error(j.error ?? "Could not get upload signature");
-  if (!j.cloudName || !j.folder || !j.resource_type) {
-    throw new Error("Invalid upload signature response");
-  }
-  if (!j.upload_preset && (!j.apiKey || !j.signature || !j.timestamp)) {
+
+  if (
+    !normalized.cloudName ||
+    !normalized.apiKey ||
+    !normalized.signature ||
+    !Number.isFinite(normalized.timestamp) ||
+    !normalized.folder ||
+    !normalized.resource_type
+  ) {
     throw new Error("Invalid Cloudinary auth response");
   }
-  return j as CloudinarySignature;
+  return normalized as CloudinarySignature;
 }
 
 function xhrCloudinaryUpload(opts: {
@@ -79,16 +100,9 @@ function xhrCloudinaryUpload(opts: {
     const fd = new FormData();
     fd.set("file", opts.file);
     fd.set("folder", opts.sig.folder);
-    if (opts.sig.upload_preset) {
-      fd.set("upload_preset", opts.sig.upload_preset);
-    } else {
-      if (!opts.sig.apiKey || !opts.sig.signature || !opts.sig.timestamp) {
-        return reject(new Error("Missing Cloudinary signed upload fields"));
-      }
-      fd.set("api_key", opts.sig.apiKey);
-      fd.set("timestamp", String(opts.sig.timestamp));
-      fd.set("signature", opts.sig.signature);
-    }
+    fd.set("api_key", opts.sig.apiKey);
+    fd.set("timestamp", String(opts.sig.timestamp));
+    fd.set("signature", opts.sig.signature);
 
     const xhr = new XMLHttpRequest();
     xhr.open("POST", endpoint);
