@@ -268,6 +268,34 @@ export async function setApplicationStatus(
   return { ok: true, emailError: data.emailError };
 }
 
+export type DeleteApplicationResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
+export async function deleteApplication(
+  id: string
+): Promise<DeleteApplicationResult> {
+  await verifyAdminSession();
+  const headers = await authHeaders();
+  const res = await fetch(
+    `${backendBase()}/api/admin/applications/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+      headers,
+      cache: "no-store",
+    }
+  );
+  if (!res.ok) {
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    return {
+      ok: false,
+      error: j.error ?? "Could not delete this submission. Please try again.",
+    };
+  }
+  revalidatePath("/admin/applications");
+  return { ok: true };
+}
+
 export type UpdateInterviewResult =
   | { ok: true }
   | { ok: false; error: string };
