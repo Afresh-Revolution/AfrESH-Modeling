@@ -1,5 +1,6 @@
 import { fetchApplicationsJson } from "../../actions";
 import styles from "../../admin.module.scss";
+import { ApplicationDeleteButton } from "./ApplicationDeleteButton";
 import { ApplicationInterviewCell } from "./ApplicationInterviewCell";
 import { ApplicationPhotoButton } from "./ApplicationPhotoButton";
 import { ApplicationStatusSelect } from "./ApplicationStatusSelect";
@@ -65,6 +66,7 @@ export default async function AdminApplicationsPage() {
               <th>Photos</th>
               <th>Interview</th>
               <th>Submitted</th>
+              <th aria-label="Actions"></th>
             </tr>
           </thead>
           <tbody>
@@ -107,6 +109,14 @@ export default async function AdminApplicationsPage() {
                   {row.created_at
                     ? new Date(String(row.created_at)).toLocaleString()
                     : "—"}
+                </td>
+                <td>
+                  <ApplicationDeleteButton
+                    id={String(row.id)}
+                    name={
+                      typeof row.full_name === "string" ? row.full_name : null
+                    }
+                  />
                 </td>
               </tr>
             ))}
