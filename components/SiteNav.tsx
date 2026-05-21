@@ -23,9 +23,12 @@ export function SiteNav() {
     document.body.style.overflow = "";
   }, []);
 
-  const openMobile = useCallback(() => {
-    setMobileOpen(true);
-    document.body.style.overflow = "hidden";
+  const toggleMobile = useCallback(() => {
+    setMobileOpen((open) => {
+      const next = !open;
+      document.body.style.overflow = next ? "hidden" : "";
+      return next;
+    });
   }, []);
 
   useEffect(() => {
@@ -64,13 +67,18 @@ export function SiteNav() {
         </div>
         <button
           type="button"
-          className="mobile-menu-btn"
+          className={`mobile-menu-btn${mobileOpen ? " is-open" : ""}`}
           id="mobileMenuBtn"
-          aria-label="Open menu"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
-          onClick={openMobile}
+          aria-controls="mobileNav"
+          onClick={toggleMobile}
         >
-          <i className="fas fa-bars" aria-hidden />
+          <span className="mobile-menu-icon" aria-hidden>
+            <span className="mobile-menu-line" />
+            <span className="mobile-menu-line" />
+            <span className="mobile-menu-line" />
+          </span>
         </button>
       </nav>
 
@@ -81,15 +89,6 @@ export function SiteNav() {
         aria-modal="true"
         aria-label="Mobile navigation"
       >
-        <button
-          type="button"
-          className="mobile-nav-close"
-          id="mobileNavClose"
-          aria-label="Close menu"
-          onClick={closeMobile}
-        >
-          <i className="fas fa-times" aria-hidden />
-        </button>
         <a href="#models" onClick={closeMobile}>
           Models
         </a>
