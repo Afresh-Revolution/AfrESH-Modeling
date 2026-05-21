@@ -11,7 +11,7 @@ type DeferredInstallPromptEvent = Event & {
 
 declare global {
   interface Window {
-    __onyxxDeferredPrompt?: DeferredInstallPromptEvent;
+    __afreshDeferredPrompt?: DeferredInstallPromptEvent;
   }
 }
 
@@ -39,21 +39,21 @@ export function PwaInstallButton() {
     if (isStandalone) {
       setInstalled(true);
     }
-    if (window.__onyxxDeferredPrompt) {
-      setDeferredPrompt(window.__onyxxDeferredPrompt);
+    if (window.__afreshDeferredPrompt) {
+      setDeferredPrompt(window.__afreshDeferredPrompt);
     }
 
     const onBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       const promptEvent = event as DeferredInstallPromptEvent;
-      window.__onyxxDeferredPrompt = promptEvent;
+      window.__afreshDeferredPrompt = promptEvent;
       setDeferredPrompt(promptEvent);
     };
 
     const onInstalled = () => {
       setInstalled(true);
       setDeferredPrompt(null);
-      window.__onyxxDeferredPrompt = undefined;
+      window.__afreshDeferredPrompt = undefined;
       setShowHelp(false);
       window.setTimeout(() => setInstalled(false), 5000);
     };
@@ -80,12 +80,12 @@ export function PwaInstallButton() {
   }, [platform]);
 
   async function onInstallClick() {
-    const promptEvent = deferredPrompt ?? window.__onyxxDeferredPrompt ?? null;
+    const promptEvent = deferredPrompt ?? window.__afreshDeferredPrompt ?? null;
     if (promptEvent) {
       await promptEvent.prompt();
       await promptEvent.userChoice.catch(() => undefined);
       setDeferredPrompt(null);
-      window.__onyxxDeferredPrompt = undefined;
+      window.__afreshDeferredPrompt = undefined;
       return;
     }
     setShowHelp(true);
@@ -114,7 +114,7 @@ export function PwaInstallButton() {
             >
               <i className="fas fa-xmark" aria-hidden />
             </button>
-            <h3 id="install-help-title">Install ONYXX App</h3>
+            <h3 id="install-help-title">Install AfrESH Modeling App</h3>
             <p>{helpText}</p>
             <div className="footer-modal-actions">
               <button type="button" className="footer-btn footer-btn-outline" onClick={() => setShowHelp(false)}>

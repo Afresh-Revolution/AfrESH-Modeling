@@ -1,3 +1,4 @@
+import { BRAND_LOGO_SRC } from "@/lib/brand";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { PwaManager } from "@/components/PwaManager";
 import type { Metadata } from "next";
@@ -17,13 +18,13 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "ONYXX CLUB — Modeling Agency",
+  title: "AfrESH Modeling — Modeling Agency",
   description:
     "Where elegance meets excellence. Data-driven talent development and placement.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/pwa-logo.JPG",
-    apple: "/pwa-logo.JPG",
+    icon: BRAND_LOGO_SRC,
+    apple: BRAND_LOGO_SRC,
   },
 };
 

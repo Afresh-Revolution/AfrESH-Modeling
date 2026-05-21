@@ -1,3 +1,4 @@
+import { BRAND_LOGO_SRC, BRAND_NAME } from "@/lib/brand";
 import Image from "next/image";
 
 type LogoSvgProps = {
@@ -11,18 +12,20 @@ type LogoSvgProps = {
 export function LogoSvg({
   className,
   height = 42,
-  alt = "ONYXX CLUB",
+  alt = BRAND_NAME,
   priority,
 }: LogoSvgProps) {
   return (
     <Image
-      src="/logo.png"
+      src={BRAND_LOGO_SRC}
       alt={alt}
       width={height}
       height={height}
-      className={className}
+      className={className ? `brand-logo ${className}` : "brand-logo"}
+      style={{ width: "auto", height }}
       sizes={`${height}px`}
       priority={priority}
+      unoptimized
     />
   );
 }

@@ -22,7 +22,7 @@ export function VideoShowcase({ items }: { items: EditorialItem[] }) {
             <h2 className="section-title">Film &amp; Campaign</h2>
             <p className="section-desc">
               Moving image from recent productions and brand work across the{" "}
-              <strong style={{ color: "var(--gold)" }}>ONYXX</strong> roster.
+              <strong style={{ color: "var(--gold)" }}>AfrESH Modeling</strong> roster.
             </p>
           </div>
         </div>

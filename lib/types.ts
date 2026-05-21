@@ -6,6 +6,15 @@ export type RosterModel = {
   sort_order?: number;
 };
 
+export type HireModel = {
+  id?: string;
+  name: string;
+  image_url?: string | null;
+  video_url?: string | null;
+  accomplishments: string;
+  sort_order?: number;
+};
+
 export type EditorialItem = {
   id?: string;
   title: string;

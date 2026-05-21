@@ -16,7 +16,7 @@ export async function uploadImageDataUri(
 ): Promise<string> {
   ensureConfigured();
   const uploadFolder =
-    folder ?? process.env.CLOUDINARY_UPLOAD_FOLDER ?? "onyxx/applications";
+    folder ?? process.env.CLOUDINARY_UPLOAD_FOLDER ?? "afresh/applications";
   const res = await cloudinary.uploader.upload(dataUri, {
     folder: uploadFolder,
     resource_type: "image",

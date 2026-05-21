@@ -43,11 +43,12 @@ export function SiteNav() {
         className={`nav-main${scrolled ? " scrolled" : ""}`}
         id="mainNav"
       >
-        <a href="#hero" className="nav-logo" aria-label="ONYXX CLUB home">
+        <a href="#hero" className="nav-logo" aria-label="AfrESH Modeling home">
           <LogoSvg alt="" priority />
         </a>
         <div className="nav-links">
           <a href="#models">Models</a>
+          <a href="#hire-models">Hiring</a>
           <a href="#ecosystem">Ecosystem</a>
           <a href="#data">Insights</a>
           <a href="#film">Film</a>
@@ -91,6 +92,9 @@ export function SiteNav() {
         </button>
         <a href="#models" onClick={closeMobile}>
           Models
+        </a>
+        <a href="#hire-models" onClick={closeMobile}>
+          Hiring
         </a>
         <a href="#ecosystem" onClick={closeMobile}>
           Ecosystem

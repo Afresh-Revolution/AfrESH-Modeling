@@ -1,5 +1,5 @@
-const CACHE_NAME = "onyxx-cache-v1";
-const CORE_ASSETS = ["/", "/manifest.webmanifest", "/pwa-logo.JPG"];
+const CACHE_NAME = "afresh-cache-v2";
+const CORE_ASSETS = ["/", "/manifest.webmanifest", "/brand-logo.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)));

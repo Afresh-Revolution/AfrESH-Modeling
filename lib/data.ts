@@ -1,4 +1,5 @@
 import { getPgPool } from "@/lib/db/postgres";
+import { FALLBACK_HIRE_MODELS } from "./hire-models-fallback";
 import { FALLBACK_EDITORIAL, FALLBACK_ROSTER } from "./roster-fallback";
 import {
   DEFAULT_SITE_METRICS,
@@ -6,7 +7,7 @@ import {
   type SiteMetrics,
 } from "./siteMetrics";
 import { createSupabaseAnon } from "./supabase";
-import type { EditorialItem, RosterModel } from "./types";
+import type { EditorialItem, HireModel, RosterModel } from "./types";
 
 function backendBase(): string | null {
   const base = process.env.BASE_URL?.trim().replace(/\/$/, "");
@@ -59,6 +60,55 @@ function coerceEditorialRow(row: EditorialItem): EditorialItem {
         ? row.video_url.trim()
         : row.video_url ?? null,
   };
+}
+
+function coerceHireModelRow(row: HireModel): HireModel {
+  return {
+    ...row,
+    image_url:
+      typeof row.image_url === "string" && row.image_url.trim().length
+        ? row.image_url.trim()
+        : row.image_url ?? null,
+    video_url:
+      typeof row.video_url === "string" && row.video_url.trim().length
+        ? row.video_url.trim()
+        : row.video_url ?? null,
+    accomplishments: row.accomplishments ?? "",
+  };
+}
+
+function normalizeHireModels(rows: unknown[]): HireModel[] {
+  const out: HireModel[] = [];
+  for (const row of rows) {
+    if (!row || typeof row !== "object") continue;
+    const r = row as Record<string, unknown>;
+    const name = typeof r.name === "string" ? r.name : "";
+    const accomplishments =
+      typeof r.accomplishments === "string" ? r.accomplishments : "";
+    const image =
+      typeof r.image_url === "string"
+        ? r.image_url
+        : typeof r.imageUrl === "string"
+          ? r.imageUrl
+          : "";
+    const video =
+      typeof r.video_url === "string"
+        ? r.video_url
+        : typeof r.videoUrl === "string"
+          ? r.videoUrl
+          : null;
+    if (!name) continue;
+    if (!image && !video) continue;
+    out.push({
+      id: typeof r.id === "string" ? r.id : typeof r.id === "number" ? String(r.id) : undefined,
+      name,
+      accomplishments,
+      image_url: image || null,
+      video_url: video,
+      sort_order: typeof r.sort_order === "number" ? r.sort_order : undefined,
+    });
+  }
+  return out;
 }
 
 function normalizeEditorial(rows: unknown[]): EditorialItem[] {
@@ -165,6 +215,45 @@ export async function fetchEditorial(): Promise<EditorialItem[]> {
   }
 
   return FALLBACK_EDITORIAL.map((r) => coerceEditorialRow(r));
+}
+
+export async function fetchHireModels(): Promise<HireModel[]> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      const { rows } = await pool.query<HireModel>(
+        `SELECT id::text, name, image_url, video_url, accomplishments, sort_order
+         FROM hire_models
+         ORDER BY sort_order ASC NULLS LAST, name ASC`
+      );
+      if (rows.length) return rows.map((r) => coerceHireModelRow(r));
+    } catch (e) {
+      console.error("[fetchHireModels] postgres:", e);
+    }
+  }
+
+  const supabase = createSupabaseAnon();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("hire_models")
+      .select("id,name,image_url,video_url,accomplishments,sort_order")
+      .order("sort_order", { ascending: true });
+
+    if (!error && data?.length) {
+      return (data as HireModel[]).map((r) => coerceHireModelRow(r));
+    }
+  }
+
+  const backend = await tryFetchFromBackend<{ hire_models?: unknown[]; data?: unknown[] }>(
+    "/api/hire-models"
+  );
+  const hireRows = backend?.hire_models?.length ? backend.hire_models : backend?.data;
+  if (Array.isArray(hireRows) && hireRows.length) {
+    const normalized = normalizeHireModels(hireRows);
+    if (normalized.length) return normalized.map((r) => coerceHireModelRow(r));
+  }
+
+  return FALLBACK_HIRE_MODELS.map((r) => coerceHireModelRow(r));
 }
 
 export async function fetchSiteMetrics(): Promise<SiteMetrics> {

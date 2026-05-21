@@ -10,14 +10,16 @@ import { SiteNav } from "@/components/SiteNav";
 import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 import { StatsBar } from "@/components/StatsBar";
 import { VideoShowcase } from "@/components/VideoShowcase";
-import { fetchEditorial, fetchRoster, fetchSiteMetrics } from "@/lib/data";
+import { HireModelsSection } from "@/components/HireModelsSection";
+import { fetchEditorial, fetchHireModels, fetchRoster, fetchSiteMetrics } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [roster, editorial, metrics] = await Promise.all([
+  const [roster, editorial, hireModels, metrics] = await Promise.all([
     fetchRoster(),
     fetchEditorial(),
+    fetchHireModels(),
     fetchSiteMetrics(),
   ]);
   const filmItems = editorial.filter(
@@ -55,7 +57,7 @@ export default async function HomePage() {
               <h2 className="section-title">Our Roster</h2>
               <p className="section-desc">
                 Discover the faces that define{" "}
-                <strong style={{ color: "var(--gold)" }}>ONYXX CLUB</strong> —
+                <strong style={{ color: "var(--gold)" }}>AfrESH Modeling</strong> —
                 each selected for their unique presence and professional drive.
               </p>
             </div>
@@ -63,6 +65,8 @@ export default async function HomePage() {
           <ModelsCarousel models={roster} />
         </div>
       </section>
+
+      <HireModelsSection models={hireModels} />
 
       <section className="section eco-section" id="ecosystem">
         <div
@@ -79,7 +83,7 @@ export default async function HomePage() {
               <div className="section-label">
                 <span className="line" /> Our Process
               </div>
-              <h2 className="section-title">The ONYXX Ecosystem</h2>
+              <h2 className="section-title">The AfrESH Modeling Ecosystem</h2>
               <p className="section-desc">
                 A{" "}
                 <strong style={{ color: "var(--fg)" }}>
@@ -197,7 +201,7 @@ export default async function HomePage() {
             <div className="section-label">
               <span className="line" /> Open Call
             </div>
-            <h2 className="section-title">Become Part of the Club</h2>
+            <h2 className="section-title">Become Part of AfrESH Modeling</h2>
             <p className="section-desc" style={{ marginBottom: 0 }}>
               We are always looking for extraordinary individuals. Submit your
               application below.
@@ -207,7 +211,7 @@ export default async function HomePage() {
             <div className="apply-info reveal reveal-delay-1">
               <h3>What We Look For</h3>
               <p>
-                ONYXX CLUB represents a curated selection of talent. Our
+                AfrESH Modeling represents a curated selection of talent. Our
                 scouting process is both intuitive and analytical, seeking
                 individuals who bring something unmistakable to the industry.
               </p>
@@ -261,7 +265,7 @@ export default async function HomePage() {
                 A glimpse into the campaigns and editorial work produced through
                 the{" "}
                 <strong style={{ color: "var(--gold)" }}>
-                  ONYXX ecosystem
+                  AfrESH Modeling ecosystem
                 </strong>
                 .
               </p>
