@@ -196,7 +196,7 @@ export function SiteFooter() {
                 <a href="#">Jos, Nigeria</a>
               </li>
               <li>
-                <a href="mailto:freshmodeling@gmail.com">freshmodeling@gmail.com</a>
+                <a href="mailto:afreshmodeling@gmail.com">afreshmodeling@gmail.com</a>
               </li>
             </ul>
           </div>
@@ -209,7 +209,7 @@ export function SiteFooter() {
             <i className="fas fa-eye" aria-hidden /> View Portfolio
           </a>
           <PwaInstallButton />
-          <a href="mailto:freshmodeling@gmail.com" className="footer-btn footer-btn-ghost">
+          <a href="mailto:afreshmodeling@gmail.com" className="footer-btn footer-btn-ghost">
             <i className="fas fa-envelope" aria-hidden /> Contact Us
           </a>
         </div>
