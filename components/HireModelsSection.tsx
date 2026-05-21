@@ -93,7 +93,7 @@ export function HireModelsSection({ models }: { models: HireModel[] }) {
 
         <div className="hire-cta reveal">
           <p>Need a specific look or market? Tell us your brief and we&apos;ll shortlist talent.</p>
-          <a href="mailto:freshmodeling@gmail.com?subject=Model%20Hiring%20Inquiry" className="btn-primary">
+          <a href="mailto:afreshmodeling@gmail.com?subject=Model%20Hiring%20Inquiry" className="btn-primary">
             Request Talent
           </a>
         </div>
