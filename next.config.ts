@@ -9,6 +9,8 @@ function buildCsp() {
   const scriptSrc = [
     "'self'",
     "'unsafe-inline'",
+    // Injected by Cloudflare Web Analytics when the site is proxied through CF.
+    "https://static.cloudflareinsights.com",
     ...(isProd ? [] : ["'unsafe-eval'"]),
   ];
   const styleSrc = ["'self'", "'unsafe-inline'"];
