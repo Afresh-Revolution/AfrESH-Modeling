@@ -455,6 +455,45 @@
   box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
 }
 
+.loginPasswordWrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+
+  .loginInput {
+    padding-right: 3rem;
+  }
+}
+
+.loginPasswordToggle {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fg-muted, #a09888);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.loginPasswordToggle:hover {
+  color: var(--gold, #c9a84c);
+  background: rgba(201, 168, 76, 0.08);
+}
+
+.loginPasswordToggle:focus-visible {
+  outline: 2px solid var(--gold, #c9a84c);
+  outline-offset: 2px;
+}
+
 .loginSubmit {
   margin-top: 0.35rem;
   width: 100%;
