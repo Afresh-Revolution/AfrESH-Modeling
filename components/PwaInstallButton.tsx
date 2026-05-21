@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 type InstallPlatform = "ios" | "firefox" | "chromium" | "other";
 
@@ -31,13 +32,14 @@ export function PwaInstallButton() {
   const [platform, setPlatform] = useState<InstallPlatform>("other");
   const [deferredPrompt, setDeferredPrompt] = useState<DeferredInstallPromptEvent | null>(null);
   const [showHelp, setShowHelp] = useState(false);
-  const [installed, setInstalled] = useState(false);
+  const [installedApp, setInstalledApp] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   useEffect(() => {
     setPlatform(detectPlatform());
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
     if (isStandalone) {
-      setInstalled(true);
+      setInstalledApp(true);
     }
     if (window.__afreshDeferredPrompt) {
       setDeferredPrompt(window.__afreshDeferredPrompt);
@@ -51,11 +53,11 @@ export function PwaInstallButton() {
     };
 
     const onInstalled = () => {
-      setInstalled(true);
+      setInstalledApp(true);
       setDeferredPrompt(null);
       window.__afreshDeferredPrompt = undefined;
       setShowHelp(false);
-      window.setTimeout(() => setInstalled(false), 5000);
+      setShowSuccessToast(true);
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
@@ -65,6 +67,12 @@ export function PwaInstallButton() {
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
+
+  useEffect(() => {
+    if (!showSuccessToast) return;
+    const timer = window.setTimeout(() => setShowSuccessToast(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [showSuccessToast]);
 
   const helpText = useMemo(() => {
     if (platform === "ios") {
@@ -94,7 +102,7 @@ export function PwaInstallButton() {
   return (
     <>
       <button type="button" className="footer-btn footer-btn-outline" onClick={onInstallClick}>
-        <i className="fas fa-download" aria-hidden /> {installed ? "App Installed" : "Install App"}
+        <i className="fas fa-download" aria-hidden /> {installedApp ? "App Installed" : "Install App"}
       </button>
 
       {showHelp ? (
@@ -125,11 +133,14 @@ export function PwaInstallButton() {
         </div>
       ) : null}
 
-      {installed ? (
-        <div className="pwa-toast pwa-toast-success" role="status" aria-live="polite">
-          <i className="fas fa-circle-check" aria-hidden /> App installed successfully.
-        </div>
-      ) : null}
+      {showSuccessToast && typeof document !== "undefined"
+        ? createPortal(
+            <div className="pwa-toast pwa-toast-success" role="status" aria-live="polite">
+              <i className="fas fa-circle-check" aria-hidden /> App installed successfully.
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }
