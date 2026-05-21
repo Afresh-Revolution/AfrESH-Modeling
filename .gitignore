@@ -1,5 +1,8 @@
 # dependencies
 /node_modules
+/onyxx-backend/node_modules
+/onyxx-backend/dist
+/onyxx-backend/.env
 /.pnp
 .pnp.*
 .yarn/*
