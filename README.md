@@ -118,6 +118,7 @@ Reference spec: `.do/app.yaml`
 | `CLOUDINARY_UPLOAD_FOLDER` | No | Default `afresh` |
 | `PUBLIC_SITE_URL` | Recommended | This app’s public URL / custom domain |
 | `DATABASE_URL` | Optional | Only if using Next-side hire-models DB fallback |
+| `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` | **Yes (prod)** | `openssl rand -base64 32` — same value at **build and run**; fixes admin Server Action 404s |
 | `PORT` | Auto | DO sets `8080` |
 
 Example:
@@ -242,6 +243,22 @@ Production installs must include **`sass`** (listed in root `dependencies`). Reb
 - `JWT_SECRET` must match on web and API.
 - `BASE_URL` on the web app must reach the API `/api/auth/login`.
 - Cookie `secure` flag requires HTTPS in production.
+
+### `POST /admin/login` 404 / `UnrecognizedActionError` (Server Action not found)
+
+The login form uses a **Next.js Server Action**, not a REST route. The browser POSTs to `/admin/login` with an encrypted action id; a **404** means the server build does not recognize that id.
+
+**Fix (required on DigitalOcean):**
+
+1. Generate a key once: `openssl rand -base64 32`
+2. Add **`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`** to the **web** app env vars in the DO dashboard (App-Level, not runtime-only).
+3. **Redeploy** so `npm run build` runs with the key set (the key is baked into the build).
+4. Hard-refresh the browser (or purge **Cloudflare** cache for `/_next/*` and HTML) so JS matches the new build.
+
+Also check:
+
+- Custom domain (`afreshmodeling.com`) points at the **Next web service**, not a static site or old deployment.
+- You are not mixing an old tab (pre-deploy JS) with a new server — close the tab and reopen after deploy.
 
 ### Hire models admin errors
 

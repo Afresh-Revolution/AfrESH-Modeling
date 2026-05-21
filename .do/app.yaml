@@ -21,5 +21,6 @@ services:
       timeout_seconds: 5
       success_threshold: 1
       failure_threshold: 5
-    # Set in DO dashboard: BASE_URL, NEXT_PUBLIC_BASE_URL, JWT_SECRET, CLOUDINARY_*, DATABASE_URL (optional)
+    # Set in DO dashboard: BASE_URL, NEXT_PUBLIC_BASE_URL, JWT_SECRET, CLOUDINARY_*,
+    # NEXT_SERVER_ACTIONS_ENCRYPTION_KEY (openssl rand -base64 32), DATABASE_URL (optional)
     envs: []
