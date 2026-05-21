@@ -17,7 +17,7 @@ export function HeroSection() {
           Now Accepting Applications
         </div>
         <h1 className="hero-title">
-          ONYXX <span>CLUB</span>
+          AfrESH <span>Modeling</span>
         </h1>
         <p className="hero-subtitle">Where Elegance Meets Excellence</p>
         <div className="hero-actions">

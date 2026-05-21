@@ -108,11 +108,20 @@ img {
   gap: 0.75rem;
   flex-shrink: 0;
 }
+.brand-logo,
+.nav-logo img {
+  width: auto !important;
+  object-fit: contain;
+}
 .nav-logo img {
   height: 42px;
-  width: auto;
-  max-width: min(200px, 45vw);
-  object-fit: contain;
+  max-width: min(120px, 28vw);
+}
+.footer-brand .footer-logo,
+.footer-brand .brand-logo {
+  display: block;
+  height: 48px;
+  max-width: 120px;
 }
 .nav-links {
   display: flex;
@@ -932,6 +941,92 @@ img {
   border-color: #e85d75;
 }
 
+/* ===== Hiring models section ===== */
+.hire-section {
+  scroll-margin-top: 5rem;
+  background: var(--bg-secondary);
+}
+.hire-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+}
+.hire-card {
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.hire-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+.hire-card-media {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: #111;
+  overflow: hidden;
+}
+.hire-card-img,
+.hire-card-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hire-card-body {
+  padding: 1.25rem 1.35rem 1.5rem;
+}
+.hire-card-name {
+  font-family: var(--font-nunito), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin: 0 0 0.75rem;
+}
+.hire-card-records {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.hire-card-records li + li {
+  margin-top: 0.35rem;
+}
+.hire-card-records-empty {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.hire-empty {
+  margin-top: 2rem;
+  color: var(--muted);
+  text-align: center;
+}
+.hire-cta {
+  margin-top: 3rem;
+  padding: 2rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background: rgba(201, 168, 76, 0.06);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+.hire-cta p {
+  margin: 0;
+  max-width: 36rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 /* ===== Gallery Section ===== */
 .gallery-grid {
   display: grid;
@@ -1643,6 +1738,9 @@ img {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
+  .hire-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-rows: 200px;
@@ -1679,6 +1777,9 @@ img {
     grid-template-columns: 1fr;
   }
   .form-row {
+    grid-template-columns: 1fr;
+  }
+  .hire-grid {
     grid-template-columns: 1fr;
   }
   .gallery-grid {

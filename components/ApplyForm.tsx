@@ -286,7 +286,7 @@ export function ApplyForm() {
       <div className="form-checkbox">
         <input type="checkbox" id="fterms" name="fterms" required />
         <label htmlFor="fterms">
-          I agree to the ONYXX CLUB terms of service and privacy policy. I confirm that all information provided is accurate.
+          I agree to the AfrESH Modeling terms of service and privacy policy. I confirm that all information provided is accurate.
         </label>
       </div>
       <button

@@ -33,7 +33,7 @@ export default function AdminLoginPage() {
         <Link
           href="/"
           className={styles.loginBrand}
-          aria-label="ONYXX CLUB home"
+          aria-label="AfrESH Modeling home"
         >
           <LogoSvg className={styles.loginBrandLogo} height={80} alt="" />
         </Link>

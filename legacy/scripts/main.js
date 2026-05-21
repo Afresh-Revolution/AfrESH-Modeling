@@ -1,15 +1,15 @@
 // ===== Model Data =====
 const models = [
-    { name: "Valentina Reis", category: "Editorial", img: "https://picsum.photos/seed/onyxx-m1/400/550.jpg" },
-    { name: "Amara Okafor", category: "Runway", img: "https://picsum.photos/seed/onyxx-m2/400/550.jpg" },
-    { name: "Suki Tanaka", category: "Commercial", img: "https://picsum.photos/seed/onyxx-m3/400/550.jpg" },
-    { name: "Ingrid Svensson", category: "Editorial", img: "https://picsum.photos/seed/onyxx-m4/400/550.jpg" },
-    { name: "Naomi Carter", category: "Runway", img: "https://picsum.photos/seed/onyxx-m5/400/550.jpg" },
-    { name: "Lucia Fernandez", category: "Plus Size", img: "https://picsum.photos/seed/onyxx-m6/400/550.jpg" },
-    { name: "Zara Khan", category: "Fitness", img: "https://picsum.photos/seed/onyxx-m7/400/550.jpg" },
-    { name: "Elise Dubois", category: "Editorial", img: "https://picsum.photos/seed/onyxx-m8/400/550.jpg" },
-    { name: "Maya Johnson", category: "Commercial", img: "https://picsum.photos/seed/onyxx-m9/400/550.jpg" },
-    { name: "Chiara Rossi", category: "Runway", img: "https://picsum.photos/seed/onyxx-m10/400/550.jpg" }
+    { name: "Valentina Reis", category: "Editorial", img: "https://picsum.photos/seed/afresh-m1/400/550.jpg" },
+    { name: "Amara Okafor", category: "Runway", img: "https://picsum.photos/seed/afresh-m2/400/550.jpg" },
+    { name: "Suki Tanaka", category: "Commercial", img: "https://picsum.photos/seed/afresh-m3/400/550.jpg" },
+    { name: "Ingrid Svensson", category: "Editorial", img: "https://picsum.photos/seed/afresh-m4/400/550.jpg" },
+    { name: "Naomi Carter", category: "Runway", img: "https://picsum.photos/seed/afresh-m5/400/550.jpg" },
+    { name: "Lucia Fernandez", category: "Plus Size", img: "https://picsum.photos/seed/afresh-m6/400/550.jpg" },
+    { name: "Zara Khan", category: "Fitness", img: "https://picsum.photos/seed/afresh-m7/400/550.jpg" },
+    { name: "Elise Dubois", category: "Editorial", img: "https://picsum.photos/seed/afresh-m8/400/550.jpg" },
+    { name: "Maya Johnson", category: "Commercial", img: "https://picsum.photos/seed/afresh-m9/400/550.jpg" },
+    { name: "Chiara Rossi", category: "Runway", img: "https://picsum.photos/seed/afresh-m10/400/550.jpg" }
 ];
 
 // ===== Build Carousel =====

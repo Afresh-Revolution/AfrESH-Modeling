@@ -1,9 +1,10 @@
+import { BRAND_LOGO_MIME, BRAND_LOGO_SRC } from "@/lib/brand";
 import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ONYXX CLUB",
-    short_name: "ONYXX",
+    name: "AfrESH Modeling",
+    short_name: "AfrESH",
     description: "Data-driven talent development and placement.",
     id: "/",
     start_url: "/",
@@ -16,15 +17,15 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: "portrait",
     icons: [
       {
-        src: "/pwa-logo.JPG",
+        src: BRAND_LOGO_SRC,
         sizes: "1024x1024",
-        type: "image/jpeg",
+        type: BRAND_LOGO_MIME,
         purpose: "any",
       },
       {
-        src: "/pwa-logo.JPG",
+        src: BRAND_LOGO_SRC,
         sizes: "1024x1024",
-        type: "image/jpeg",
+        type: BRAND_LOGO_MIME,
         purpose: "maskable",
       },
     ],

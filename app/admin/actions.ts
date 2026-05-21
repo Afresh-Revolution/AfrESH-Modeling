@@ -100,6 +100,36 @@ export async function fetchRosterJson() {
   }>;
 }
 
+export async function fetchHireModelsJson() {
+  await verifyAdminSession();
+
+  const { hireModelsStorageReady, listHireModelsAdmin } = await import(
+    "@/lib/adminHireModels"
+  );
+
+  if (hireModelsStorageReady()) {
+    const hire_models = await listHireModelsAdmin();
+    return { hire_models: hire_models as Record<string, unknown>[] };
+  }
+
+  const res = await adminFetch("/api/admin/hire-models");
+  if (res.ok) {
+    return res.json() as Promise<{
+      hire_models: Record<string, unknown>[];
+    }>;
+  }
+
+  if (res.status === 404) {
+    return { hire_models: [] };
+  }
+
+  const detail = (await res.json().catch(() => ({}))) as { error?: string };
+  throw new Error(
+    detail.error ??
+      "We couldn't load hiring profiles. Add DATABASE_URL to .env or redeploy the API with hire-models support."
+  );
+}
+
 export async function fetchEditorialJson() {
   const res = await adminFetch("/api/admin/editorial");
   if (!res.ok) throw new Error("We couldn't load campaigns. Refresh the page and try again.");

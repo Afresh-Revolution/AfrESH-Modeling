@@ -11,11 +11,12 @@ export default function AdminPanelLayout({
   return (
     <div className={styles.admin}>
       <header className={styles.adminHeader}>
-        <span className={styles.adminBrand}>ONYXX ADMIN</span>
+        <span className={styles.adminBrand}>AfrESH ADMIN</span>
         <nav className={styles.adminNav}>
           <Link href="/admin">Overview</Link>
           <Link href="/admin/applications">Submissions</Link>
           <Link href="/admin/roster">Roster</Link>
+          <Link href="/admin/hire-models">Hiring</Link>
           <Link href="/admin/editorial">Campaigns</Link>
           <Link href="/admin/editorial#film">Film</Link>
           <Link href="/admin/metrics">Metrics</Link>
