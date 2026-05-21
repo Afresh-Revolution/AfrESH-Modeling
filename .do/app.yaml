@@ -1,0 +1,25 @@
+# DigitalOcean App Platform — Next.js marketing site + admin UI
+# Create a separate App for onyxx-backend/.do/app.yaml (API).
+# Apply: doctl apps update <web-app-id> --spec .do/app.yaml
+
+name: afresh-web
+region: fra
+
+services:
+  - name: web
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    source_dir: /
+    build_command: npm install && npm run build
+    run_command: npm start
+    http_port: 8080
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 5
+    # Set in DO dashboard: BASE_URL, NEXT_PUBLIC_BASE_URL, JWT_SECRET, CLOUDINARY_*, DATABASE_URL (optional)
+    envs: []

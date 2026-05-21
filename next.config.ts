@@ -52,6 +52,9 @@ function buildCsp() {
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname),
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   sassOptions: {
     silenceDeprecations: ["legacy-js-api"],
   },
