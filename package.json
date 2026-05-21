@@ -8,7 +8,7 @@
     "dev:all": "concurrently -n next,api -c blue,magenta \"npm run dev\" \"npm run dev --prefix backend\"",
     "build": "next build",
     "build:backend": "npm run build --prefix backend",
-    "start": "next start",
+    "start": "node scripts/start.mjs",
     "lint": "next lint"
   },
   "dependencies": {
