@@ -6,6 +6,8 @@ import {
   parseAdminUploadError,
   xhrMultipartWithProgress,
 } from "@/lib/adminMultipartUpload";
+import { AdminMultiImageField } from "@/components/admin/AdminMultiImageField";
+import { imageUrlsForRow } from "@/lib/imageUrls";
 import { emitContentUpdate } from "@/lib/contentSync";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -36,6 +38,12 @@ function RowUpdateForm({ m }: { m: RosterRow }) {
           const form = e.currentTarget;
           const fd = new FormData(form);
           deleteEmptyFileField(fd, "image");
+          for (const key of [...fd.keys()]) {
+            if (key === "images") {
+              const v = fd.get(key);
+              if (v instanceof File && v.size <= 0) fd.delete(key);
+            }
+          }
           await xhrMultipartWithProgress({
             method: "PATCH",
             url: `/api/admin/roster/${encodeURIComponent(id)}`,
@@ -76,10 +84,7 @@ function RowUpdateForm({ m }: { m: RosterRow }) {
             defaultValue={Number(m.sort_order ?? 0)}
           />
         </div>
-        <div>
-          <label className={styles.label}>New image</label>
-          <input name="image" type="file" accept="image/*" className={styles.file} />
-        </div>
+        <AdminMultiImageField row={m} inputId={`roster-images-${id}`} label="Add more photos" />
       </div>
       <button
         type="submit"
@@ -106,8 +111,8 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Roster</h1>
       <p className={styles.adminSubtitle}>
-        Upload the main photo for each talent card. Files are saved automatically when you submit the
-        form.
+        Upload one or more photos per talent. On the public site, multiple photos rotate every 3
+        seconds; tap any photo for fullscreen.
       </p>
 
       {deleteError ? (
@@ -131,6 +136,13 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
             try {
               const form = e.currentTarget;
               const fd = new FormData(form);
+              deleteEmptyFileField(fd, "image");
+              for (const key of [...fd.keys()]) {
+                if (key === "images") {
+                  const v = fd.get(key);
+                  if (v instanceof File && v.size <= 0) fd.delete(key);
+                }
+              }
               await xhrMultipartWithProgress({
                 method: "POST",
                 url: "/api/admin/roster",
@@ -189,10 +201,19 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
               />
             </div>
             <div>
-              <label className={styles.label} htmlFor="new-image">
-                Image
+              <label className={styles.label} htmlFor="new-images">
+                Photos
               </label>
-              <input id="new-image" name="image" type="file" accept="image/*" className={styles.file} required />
+              <input
+                id="new-images"
+                name="images"
+                type="file"
+                accept="image/*"
+                multiple
+                className={styles.file}
+                required
+              />
+              <p className={styles.fieldHint}>Select one or more images.</p>
             </div>
             <div>
               <button type="submit" disabled={creating} className={`${styles.btn} ${styles.btnGold}`}>
@@ -220,16 +241,23 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
                 <tr key={id}>
                   <td>
                     <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                      {m.image_url ? (
-                        <Image
-                          src={String(m.image_url)}
-                          alt=""
-                          width={56}
-                          height={72}
-                          className={styles.thumb}
-                          unoptimized
-                        />
-                      ) : null}
+                      {imageUrlsForRow({
+                        image_urls: m.image_urls,
+                        image_url:
+                          typeof m.image_url === "string" ? m.image_url : null,
+                      })
+                        .slice(0, 3)
+                        .map((url) => (
+                          <Image
+                            key={url}
+                            src={url}
+                            alt=""
+                            width={56}
+                            height={72}
+                            className={styles.thumb}
+                            unoptimized
+                          />
+                        ))}
                       <div style={{ fontSize: "0.8rem", color: "#a09888" }}>
                         <strong style={{ color: "#f5f0e8" }}>{String(m.name)}</strong>
                         <br />

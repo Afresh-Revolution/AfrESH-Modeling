@@ -7,6 +7,7 @@ import {
   type SiteMetrics,
 } from "./siteMetrics";
 import { createSupabaseAnon } from "./supabase";
+import { imageUrlsForRow, primaryImageUrl } from "@/lib/imageUrls";
 import type { EditorialItem, HireModel, RosterModel } from "./types";
 
 function backendBase(): string | null {
@@ -31,12 +32,16 @@ function normalizeRoster(rows: unknown[]): RosterModel[] {
   for (const row of rows) {
     if (!row || typeof row !== "object") continue;
     const r = row as Record<string, unknown>;
-    const image =
-      typeof r.image_url === "string"
-        ? r.image_url
-        : typeof r.imageUrl === "string"
-          ? r.imageUrl
-          : "";
+    const image_urls = imageUrlsForRow({
+      image_urls: r.image_urls,
+      image_url:
+        typeof r.image_url === "string"
+          ? r.image_url
+          : typeof r.imageUrl === "string"
+            ? r.imageUrl
+            : null,
+    });
+    const image = primaryImageUrl(image_urls);
     const name = typeof r.name === "string" ? r.name : "";
     const category = typeof r.category === "string" ? r.category : "";
     if (!name || !category || !image) continue;
@@ -45,6 +50,7 @@ function normalizeRoster(rows: unknown[]): RosterModel[] {
       name,
       category,
       image_url: image,
+      image_urls,
       sort_order: typeof r.sort_order === "number" ? r.sort_order : undefined,
     });
   }
@@ -62,13 +68,13 @@ function coerceEditorialRow(row: EditorialItem): EditorialItem {
   };
 }
 
-function coerceHireModelRow(row: HireModel): HireModel {
+function coerceHireModelRow(row: HireModel & { image_urls?: unknown }): HireModel {
+  const image_urls = imageUrlsForRow(row);
+  const image_url = primaryImageUrl(image_urls, row.image_url) || null;
   return {
     ...row,
-    image_url:
-      typeof row.image_url === "string" && row.image_url.trim().length
-        ? row.image_url.trim()
-        : row.image_url ?? null,
+    image_url,
+    image_urls,
     video_url:
       typeof row.video_url === "string" && row.video_url.trim().length
         ? row.video_url.trim()
@@ -85,12 +91,16 @@ function normalizeHireModels(rows: unknown[]): HireModel[] {
     const name = typeof r.name === "string" ? r.name : "";
     const accomplishments =
       typeof r.accomplishments === "string" ? r.accomplishments : "";
-    const image =
-      typeof r.image_url === "string"
-        ? r.image_url
-        : typeof r.imageUrl === "string"
-          ? r.imageUrl
-          : "";
+    const image_urls = imageUrlsForRow({
+      image_urls: r.image_urls,
+      image_url:
+        typeof r.image_url === "string"
+          ? r.image_url
+          : typeof r.imageUrl === "string"
+            ? r.imageUrl
+            : null,
+    });
+    const image = primaryImageUrl(image_urls);
     const video =
       typeof r.video_url === "string"
         ? r.video_url
@@ -104,6 +114,7 @@ function normalizeHireModels(rows: unknown[]): HireModel[] {
       name,
       accomplishments,
       image_url: image || null,
+      image_urls,
       video_url: video,
       sort_order: typeof r.sort_order === "number" ? r.sort_order : undefined,
     });
@@ -147,12 +158,21 @@ export async function fetchRoster(): Promise<RosterModel[]> {
   const pool = getPgPool();
   if (pool) {
     try {
-      const { rows } = await pool.query<RosterModel>(
-        `SELECT id::text, name, category, image_url, sort_order
+      const { rows } = await pool.query<RosterModel & { image_urls?: unknown }>(
+        `SELECT id::text, name, category, image_url, image_urls, sort_order
          FROM roster
          ORDER BY sort_order ASC NULLS LAST, name ASC`
       );
-      if (rows.length) return rows;
+      if (rows.length) {
+        return rows.map((r) => {
+          const image_urls = imageUrlsForRow(r);
+          return {
+            ...r,
+            image_url: primaryImageUrl(image_urls, r.image_url),
+            image_urls,
+          };
+        });
+      }
     } catch (e) {
       console.error("[fetchRoster] postgres:", e);
     }
@@ -162,10 +182,19 @@ export async function fetchRoster(): Promise<RosterModel[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("roster")
-      .select("id,name,category,image_url,sort_order")
+      .select("id,name,category,image_url,image_urls,sort_order")
       .order("sort_order", { ascending: true });
 
-    if (!error && data?.length) return data as RosterModel[];
+    if (!error && data?.length) {
+      return (data as (RosterModel & { image_urls?: unknown })[]).map((r) => {
+        const image_urls = imageUrlsForRow(r);
+        return {
+          ...r,
+          image_url: primaryImageUrl(image_urls, r.image_url),
+          image_urls,
+        };
+      });
+    }
   }
 
   const backend = await tryFetchFromBackend<{ roster?: unknown[]; data?: unknown[] }>("/api/roster");
@@ -221,8 +250,8 @@ export async function fetchHireModels(): Promise<HireModel[]> {
   const pool = getPgPool();
   if (pool) {
     try {
-      const { rows } = await pool.query<HireModel>(
-        `SELECT id::text, name, image_url, video_url, accomplishments, sort_order
+      const { rows } = await pool.query<HireModel & { image_urls?: unknown }>(
+        `SELECT id::text, name, image_url, image_urls, video_url, accomplishments, sort_order
          FROM hire_models
          ORDER BY sort_order ASC NULLS LAST, name ASC`
       );
@@ -236,7 +265,7 @@ export async function fetchHireModels(): Promise<HireModel[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("hire_models")
-      .select("id,name,image_url,video_url,accomplishments,sort_order")
+      .select("id,name,image_url,image_urls,video_url,accomplishments,sort_order")
       .order("sort_order", { ascending: true });
 
     if (!error && data?.length) {

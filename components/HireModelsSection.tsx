@@ -1,5 +1,8 @@
+"use client";
+
 import type { HireModel } from "@/lib/types";
-import Image from "next/image";
+import { imageUrlsForRow } from "@/lib/imageUrls";
+import { RotatingGalleryImage } from "@/components/RotatingGalleryImage";
 
 function accomplishmentLines(text: string): string[] {
   return text
@@ -12,8 +15,8 @@ function HireModelCard({ model, index }: { model: HireModel; index: number }) {
   const lines = accomplishmentLines(model.accomplishments);
   const hasVideo =
     typeof model.video_url === "string" && model.video_url.trim().length > 0;
-  const hasImage =
-    typeof model.image_url === "string" && model.image_url.trim().length > 0;
+  const images = imageUrlsForRow(model);
+  const hasImage = images.length > 0;
 
   return (
     <article className="hire-card reveal" style={{ transitionDelay: `${index * 0.08}s` }}>
@@ -24,19 +27,17 @@ function HireModelCard({ model, index }: { model: HireModel; index: number }) {
             controls
             playsInline
             preload="metadata"
-            {...(hasImage ? { poster: model.image_url! } : {})}
+            {...(hasImage ? { poster: images[0] } : {})}
           >
             <source src={model.video_url!} />
           </video>
         ) : hasImage ? (
-          <Image
-            src={model.image_url!}
+          <RotatingGalleryImage
+            images={images}
             alt={model.name}
-            width={480}
-            height={640}
-            className="hire-card-img"
+            fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            unoptimized={model.image_url!.includes("picsum.photos")}
+            className="hire-card-img"
           />
         ) : null}
       </div>

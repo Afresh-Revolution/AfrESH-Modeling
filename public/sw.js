@@ -1,5 +1,11 @@
-const CACHE_NAME = "afresh-cache-v2";
-const CORE_ASSETS = ["/", "/manifest.webmanifest", "/brand-logo.png"];
+const CACHE_NAME = "afresh-cache-v3";
+const CORE_ASSETS = [
+  "/",
+  "/manifest.webmanifest",
+  "/brand-logo.png",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)));

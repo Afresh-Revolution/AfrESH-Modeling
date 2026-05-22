@@ -286,6 +286,50 @@ Also check:
 
 ---
 
+## Android app install (Play Protect / target SDK)
+
+The site is a **PWA**. On Android, Chrome wraps it in a **WebAPK** when users tap **Install App**. Google Play Protect blocks installs when the APK’s `targetSdkVersion` is more than two API levels below the device (e.g. Android 15 / API 35 warns on apps targeting API 32 or lower).
+
+### What we changed in the web app
+
+- Web manifest now includes **192×192** and **512×512** PNG icons (required for reliable Android installs).
+- Manifest `id`, `lang`, and `categories` updated so Chrome can regenerate a current WebAPK after deploy.
+- Service worker cache bumped so clients pick up the new manifest and icons.
+
+**After deploying:** ask users who saw the Play Protect dialog to **uninstall the old “AfRESH” shortcut**, update **Chrome**, then install again from `https://afreshmodeling.com`.
+
+### Play Store or sideloaded APK (Bubblewrap TWA)
+
+If you ship an APK/AAB (e.g. from PWABuilder or Play Console), rebuild with **target API 35** using the config in `android/twa-manifest.json`:
+
+1. Install **JDK 17** and Android SDK (or let Bubblewrap install the JDK when prompted).
+2. From repo root, initialize once (interactive):
+
+   ```bash
+   npx @bubblewrap/cli@latest init --manifest https://afreshmodeling.com/manifest.webmanifest --directory android
+   ```
+
+   Or copy settings from `android/twa-manifest.json` when prompted (`com.afreshmodeling.app`, host `afreshmodeling.com`).
+
+3. Build a release bundle:
+
+   ```bash
+   npm run android:build
+   ```
+
+4. Publish the new AAB/APK to Play Console (or redistribute). Remove old test tracks that still ship a low `targetSdkVersion` APK.
+
+5. Optional — **Digital Asset Links** for verified TWA: set on the web app:
+
+   ```env
+   ANDROID_PACKAGE_ID=com.afreshmodeling.app
+   ANDROID_SHA256_FINGERPRINTS=<sha256 from keytool -list -v -keystore android.keystore>
+   ```
+
+   Redeploy the web app. Verify: `https://afreshmodeling.com/.well-known/assetlinks.json`
+
+---
+
 ## Custom domains
 
 1. Attach domain to the **web** app in DigitalOcean.

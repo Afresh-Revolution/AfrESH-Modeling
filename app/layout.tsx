@@ -22,9 +22,22 @@ export const metadata: Metadata = {
   description:
     "Where elegance meets excellence. Data-driven talent development and placement.",
   manifest: "/manifest.webmanifest",
+  applicationName: "AfrESH",
+  appleWebApp: {
+    capable: true,
+    title: "AfrESH",
+    statusBarStyle: "black-translucent",
+  },
   icons: {
-    icon: BRAND_LOGO_SRC,
-    apple: BRAND_LOGO_SRC,
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: BRAND_LOGO_SRC, sizes: "500x500", type: "image/png" },
+    ],
+    apple: "/icons/icon-192.png",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
 };
 
@@ -36,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${outfit.variable} ${nunito.variable}`}>
       <head>
+        <meta name="theme-color" content="#c9a84c" />
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"

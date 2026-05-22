@@ -12,7 +12,9 @@
     "build": "next build",
     "build:backend": "npm run build --prefix onyxx-backend",
     "start": "node scripts/start.mjs",
-    "lint": "next lint"
+    "lint": "next lint",
+    "android:update": "npx @bubblewrap/cli@latest update --manifest android/twa-manifest.json",
+    "android:build": "npx @bubblewrap/cli@latest build --manifest android/twa-manifest.json"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.1",
