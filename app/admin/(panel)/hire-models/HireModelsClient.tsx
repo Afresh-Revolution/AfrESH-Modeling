@@ -6,6 +6,9 @@ import {
   parseAdminUploadError,
   xhrMultipartWithProgress,
 } from "@/lib/adminMultipartUpload";
+import { AdminMultiImageField } from "@/components/admin/AdminMultiImageField";
+import { mergeCloudinaryImagesFromForm } from "@/lib/adminCloudinaryImages";
+import { imageUrlsForRow } from "@/lib/imageUrls";
 import { emitContentUpdate } from "@/lib/contentSync";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -17,9 +20,31 @@ type HireModelItem = {
   name: string;
   accomplishments?: string | null;
   image_url?: string | null;
+  image_urls?: unknown;
   video_url?: string | null;
   sort_order?: number | null;
 };
+
+function hasImageFiles(fd: FormData): boolean {
+  for (const [key, value] of fd.entries()) {
+    if ((key === "image" || key === "images") && value instanceof File && value.size > 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+async function prepareHireImages(fd: FormData) {
+  if (hasImageFiles(fd) || typeof fd.get("image_urls") === "string") {
+    await mergeCloudinaryImagesFromForm(fd, () => fetchCloudinarySignature("image"));
+    return;
+  }
+  const manualImageUrl = fd.get("image_url");
+  if (isNonEmptyString(manualImageUrl)) {
+    fd.set("image_urls", JSON.stringify([manualImageUrl.trim()]));
+    fd.delete("image_url");
+  }
+}
 
 type CloudinarySignature = {
   cloudName: string;
@@ -174,24 +199,7 @@ function RowEditor({ item }: { item: HireModelItem }) {
           }
           }
 
-          const manualImageUrl = fd.get("image_url");
-          if (isNonEmptyString(manualImageUrl)) {
-            fd.set("image_url", manualImageUrl.trim());
-            fd.delete("image");
-          } else {
-            fd.delete("image_url");
-            const maybeImage = getNonEmptyFile(fd, "image");
-            if (maybeImage) {
-              const sig = await fetchCloudinarySignature("image");
-              const { secure_url } = await xhrCloudinaryUpload({
-                file: maybeImage,
-                sig,
-                onProgress: (p) => setUpload({ kind: "uploading", percent: p }),
-              });
-              fd.delete("image");
-              fd.set("image_url", secure_url);
-            }
-          }
+          await prepareHireImages(fd);
 
           await xhrMultipartWithProgress({
             method: "PATCH",
@@ -237,10 +245,11 @@ function RowEditor({ item }: { item: HireModelItem }) {
             defaultValue={Number(item.sort_order ?? 0)}
           />
         </div>
-        <div>
-          <label className={styles.label}>New image (optional)</label>
-          <input name="image" type="file" accept="image/*" className={styles.file} />
-        </div>
+        <AdminMultiImageField
+          row={item as Record<string, unknown>}
+          inputId={`hire-images-${id}`}
+          label="Add more photos"
+        />
         <div>
           <label className={styles.label}>Or image URL (optional)</label>
           <input
@@ -344,13 +353,13 @@ export default function HireModelsClient({
             deleteEmptyFileField(fd, "image");
             deleteEmptyFileField(fd, "video");
 
-            const hasImageFile = !!getNonEmptyFile(fd, "image");
+            const hasImageFile = hasImageFiles(fd);
             const hasVideoFile = !!getNonEmptyFile(fd, "video");
             const hasVideoUrl = isNonEmptyString(fd.get("video_url"));
             const hasImageUrl = isNonEmptyString(fd.get("image_url"));
 
             if (!hasImageFile && !hasVideoFile && !hasVideoUrl && !hasImageUrl) {
-              setUpload({ kind: "error", message: "Please choose an image or a video." });
+              setUpload({ kind: "error", message: "Please choose at least one image or a video." });
               return;
             }
 
@@ -376,24 +385,7 @@ export default function HireModelsClient({
               }
               }
 
-              const manualImageUrl = fd.get("image_url");
-              if (isNonEmptyString(manualImageUrl)) {
-                fd.set("image_url", manualImageUrl.trim());
-                fd.delete("image");
-              } else {
-                fd.delete("image_url");
-                const maybeImage = getNonEmptyFile(fd, "image");
-                if (maybeImage) {
-                  const sig = await fetchCloudinarySignature("image");
-                  const { secure_url } = await xhrCloudinaryUpload({
-                    file: maybeImage,
-                    sig,
-                    onProgress: (p) => setUpload({ kind: "uploading", percent: p }),
-                  });
-                  fd.delete("image");
-                  fd.set("image_url", secure_url);
-                }
-              }
+              await prepareHireImages(fd);
 
               await xhrMultipartWithProgress({
                 method: "POST",
@@ -453,16 +445,18 @@ export default function HireModelsClient({
               />
             </div>
             <div>
-              <label className={styles.label} htmlFor="ed-image">
-                Image (optional)
+              <label className={styles.label} htmlFor="ed-images">
+                Photos (optional)
               </label>
               <input
-                id="ed-image"
-                name="image"
+                id="ed-images"
+                name="images"
                 type="file"
                 accept="image/*"
+                multiple
                 className={styles.file}
               />
+              <p className={styles.fieldHint}>Select one or more images.</p>
             </div>
             <div>
               <label className={styles.label} htmlFor="ed-image-url">
@@ -528,17 +522,23 @@ export default function HireModelsClient({
                   <td>
                     <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                        {item.image_url ? (
-                          <Image
-                            src={String(item.image_url)}
-                            alt=""
-                            width={80}
-                            height={56}
-                            className={styles.thumb}
-                            style={{ width: 80, height: 56 }}
-                            unoptimized
-                          />
-                        ) : null}
+                        {imageUrlsForRow({
+                          image_urls: item.image_urls,
+                          image_url: item.image_url ?? null,
+                        })
+                          .slice(0, 3)
+                          .map((url) => (
+                            <Image
+                              key={url}
+                              src={url}
+                              alt=""
+                              width={80}
+                              height={56}
+                              className={styles.thumb}
+                              style={{ width: 80, height: 56 }}
+                              unoptimized
+                            />
+                          ))}
                         {item.video_url ? (
                           <video
                             src={String(item.video_url)}

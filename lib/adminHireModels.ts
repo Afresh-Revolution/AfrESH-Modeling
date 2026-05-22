@@ -1,4 +1,5 @@
 import { getPgPool } from "@/lib/db/postgres";
+import { imageUrlsForRow, parseImageUrls, toDbImageFields } from "@/lib/imageUrls";
 import { v2 as cloudinary } from "cloudinary";
 
 const HIRE_FOLDER = `${process.env.CLOUDINARY_UPLOAD_FOLDER ?? "afresh"}/hire-models`;
@@ -7,6 +8,7 @@ export type HireModelAdminRow = {
   id: string;
   name: string;
   image_url: string | null;
+  image_urls: string[];
   video_url: string | null;
   accomplishments: string;
   sort_order: number;
@@ -46,12 +48,19 @@ function poolOrThrow() {
 export async function listHireModelsAdmin(): Promise<HireModelAdminRow[]> {
   const pool = poolOrThrow();
   try {
-    const { rows } = await pool.query<HireModelAdminRow>(
-      `SELECT id::text, name, image_url, video_url, accomplishments, sort_order, created_at, updated_at
+    const { rows } = await pool.query<HireModelAdminRow & { image_urls?: unknown }>(
+      `SELECT id::text, name, image_url, image_urls, video_url, accomplishments, sort_order, created_at, updated_at
        FROM hire_models
        ORDER BY sort_order ASC NULLS LAST, name ASC`
     );
-    return rows;
+    return rows.map((r) => {
+      const image_urls = imageUrlsForRow(r);
+      return {
+        ...r,
+        image_url: image_urls[0] ?? r.image_url,
+        image_urls,
+      };
+    });
   } catch (e) {
     if (isMissingTableError(e)) {
       throw new Error(
@@ -110,6 +119,16 @@ function parseFormFields(formData: FormData): Record<string, string> {
   return fields;
 }
 
+function getImageFiles(formData: FormData): File[] {
+  const files: File[] = [];
+  for (const [key, value] of formData.entries()) {
+    if ((key === "image" || key === "images") && value instanceof File && value.size > 0) {
+      files.push(value);
+    }
+  }
+  return files;
+}
+
 export async function createHireModelFromForm(formData: FormData) {
   const fields = parseFormFields(formData);
   const name = String(fields.name ?? "").trim();
@@ -120,28 +139,35 @@ export async function createHireModelFromForm(formData: FormData) {
 
   if (!name) throw new Error("name required");
 
-  let image_url: string | null = image_url_body || null;
+  let urls: string[] = [];
+  if (fields.image_urls) {
+    try {
+      urls = parseImageUrls(JSON.parse(fields.image_urls));
+    } catch {
+      urls = [];
+    }
+  }
+  if (image_url_body && isHttpUrl(image_url_body)) urls.push(image_url_body);
+  for (const file of getImageFiles(formData)) {
+    urls.push(await uploadHireImageFile(file));
+  }
+  const { image_url, image_urls } = toDbImageFields(urls);
   const video_url: string | null = video_url_body || null;
 
-  const imageFile = formData.get("image");
-  if (imageFile instanceof File && imageFile.size > 0) {
-    image_url = await uploadHireImageFile(imageFile);
-  }
-  if (image_url && !isHttpUrl(image_url)) throw new Error("Invalid image_url");
   if (video_url && !isHttpUrl(video_url)) throw new Error("Invalid video_url");
-
   if (!image_url && !video_url) {
     throw new Error("image or video required (or image_url/video_url)");
   }
 
   const pool = poolOrThrow();
   const { rows } = await pool.query<HireModelAdminRow>(
-    `INSERT INTO hire_models (name, image_url, video_url, accomplishments, sort_order)
-     VALUES ($1, $2, $3, $4, $5)
-     RETURNING id::text, name, image_url, video_url, accomplishments, sort_order`,
-    [name, image_url, video_url, accomplishments, sort_order]
+    `INSERT INTO hire_models (name, image_url, image_urls, video_url, accomplishments, sort_order)
+     VALUES ($1, $2, $3::jsonb, $4, $5, $6)
+     RETURNING id::text, name, image_url, image_urls, video_url, accomplishments, sort_order`,
+    [name, image_url || null, JSON.stringify(image_urls), video_url, accomplishments, sort_order]
   );
-  return rows[0];
+  const row = rows[0];
+  return { ...row, image_urls: imageUrlsForRow(row) };
 }
 
 export async function updateHireModelFromForm(id: string, formData: FormData) {
@@ -172,15 +198,37 @@ export async function updateHireModelFromForm(id: string, formData: FormData) {
     fields.video_url !== undefined ? String(fields.video_url).trim() : undefined;
   const clear_video = fields.clear_video === "1" || fields.clear_video === "true";
 
-  const imageFile = formData.get("image");
-  if (imageFile instanceof File && imageFile.size > 0) {
-    const url = await uploadHireImageFile(imageFile);
+  const hasImageUpdate =
+    fields.image_urls !== undefined ||
+    image_url_body !== undefined ||
+    getImageFiles(formData).length > 0;
+
+  if (hasImageUpdate) {
+    const existing = await poolOrThrow().query<{ image_url: string | null; image_urls: unknown }>(
+      `SELECT image_url, image_urls FROM hire_models WHERE id = $1::uuid`,
+      [id]
+    );
+    if (!existing.rows.length) throw new Error("Not found");
+
+    let urls =
+      fields.image_urls !== undefined
+        ? parseImageUrls(JSON.parse(fields.image_urls))
+        : imageUrlsForRow(existing.rows[0]);
+
+    if (image_url_body !== undefined) {
+      if (image_url_body && isHttpUrl(image_url_body)) urls = [image_url_body];
+      else urls = [];
+    }
+
+    for (const file of getImageFiles(formData)) {
+      urls.push(await uploadHireImageFile(file));
+    }
+
+    const { image_url, image_urls } = toDbImageFields(urls);
     sets.push(`image_url = $${i++}`);
-    vals.push(url);
-  } else if (image_url_body !== undefined) {
-    if (image_url_body && !isHttpUrl(image_url_body)) throw new Error("Invalid image_url");
-    sets.push(`image_url = $${i++}`);
-    vals.push(image_url_body || null);
+    vals.push(image_url || null);
+    sets.push(`image_urls = $${i++}::jsonb`);
+    vals.push(JSON.stringify(image_urls));
   }
 
   if (clear_video) {
@@ -200,11 +248,12 @@ export async function updateHireModelFromForm(id: string, formData: FormData) {
   const pool = poolOrThrow();
   const { rowCount, rows } = await pool.query<HireModelAdminRow>(
     `UPDATE hire_models SET ${sets.join(", ")} WHERE id = $${i}::uuid
-     RETURNING id::text, name, image_url, video_url, accomplishments, sort_order`,
+     RETURNING id::text, name, image_url, image_urls, video_url, accomplishments, sort_order`,
     vals
   );
   if (!rowCount) throw new Error("Not found");
-  return rows[0];
+  const row = rows[0];
+  return { ...row, image_urls: imageUrlsForRow(row) };
 }
 
 export async function deleteHireModel(id: string) {

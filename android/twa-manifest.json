@@ -1,0 +1,41 @@
+{
+  "packageId": "com.afreshmodeling.app",
+  "host": "afreshmodeling.com",
+  "name": "AfrESH Modeling",
+  "launcherName": "AfrESH",
+  "display": "standalone",
+  "themeColor": "#C9A84C",
+  "themeColorDark": "#C9A84C",
+  "navigationColor": "#0B0B0D",
+  "navigationColorDark": "#0B0B0D",
+  "navigationDividerColor": "#0B0B0D",
+  "navigationDividerColorDark": "#0B0B0D",
+  "backgroundColor": "#0B0B0D",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://afreshmodeling.com/icons/icon-512.png",
+  "maskableIconUrl": "https://afreshmodeling.com/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "2.0.0",
+  "appVersionCode": 2,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://afreshmodeling.com/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 23,
+  "orientation": "portrait",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}

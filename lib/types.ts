@@ -3,6 +3,7 @@ export type RosterModel = {
   name: string;
   category: string;
   image_url: string;
+  image_urls?: string[];
   sort_order?: number;
 };
 
@@ -10,6 +11,7 @@ export type HireModel = {
   id?: string;
   name: string;
   image_url?: string | null;
+  image_urls?: string[];
   video_url?: string | null;
   accomplishments: string;
   sort_order?: number;

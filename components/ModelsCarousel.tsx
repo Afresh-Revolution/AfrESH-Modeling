@@ -1,7 +1,8 @@
 "use client";
 
 import type { RosterModel } from "@/lib/types";
-import Image from "next/image";
+import { imageUrlsForRow } from "@/lib/imageUrls";
+import { RotatingGalleryImage } from "@/components/RotatingGalleryImage";
 import {
   useCallback,
   useEffect,
@@ -104,31 +105,38 @@ export function ModelsCarousel({ models }: { models: RosterModel[] }) {
           }}
           onPointerDown={onPointerDown}
         >
-          {models.map((m) => (
-            <div className="model-card" key={`${m.name}-${m.image_url}`}>
-              <div className="model-card-socials">
-                <a href="#" aria-label="Instagram">
-                  <i className="fab fa-instagram" aria-hidden />
-                </a>
-                <a href="#" aria-label="Portfolio">
-                  <i className="fas fa-external-link-alt" aria-hidden />
-                </a>
+          {models.map((m) => {
+            const images = imageUrlsForRow(m);
+            return (
+              <div className="model-card" key={`${m.name}-${m.id ?? m.image_url}`}>
+                <div className="model-card-socials">
+                  <a href="#" aria-label="Instagram">
+                    <i className="fab fa-instagram" aria-hidden />
+                  </a>
+                  <a href="#" aria-label="Portfolio">
+                    <i className="fas fa-external-link-alt" aria-hidden />
+                  </a>
+                </div>
+                <div
+                  className="model-card-media"
+                  onPointerDown={(e) => e.stopPropagation()}
+                >
+                  <RotatingGalleryImage
+                    images={images}
+                    alt={m.name}
+                    width={400}
+                    height={550}
+                    sizes="280px"
+                    className="model-card-img"
+                  />
+                </div>
+                <div className="model-card-overlay">
+                  <div className="model-card-name">{m.name}</div>
+                  <div className="model-card-category">{m.category}</div>
+                </div>
               </div>
-              <Image
-                className="model-card-img"
-                src={m.image_url}
-                alt={m.name}
-                width={400}
-                height={550}
-                sizes="280px"
-                unoptimized={m.image_url.includes("picsum.photos")}
-              />
-              <div className="model-card-overlay">
-                <div className="model-card-name">{m.name}</div>
-                <div className="model-card-category">{m.category}</div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <div className="carousel-nav reveal">
