@@ -1,4 +1,12 @@
-import { BRAND_LOGO_MIME, BRAND_LOGO_SRC } from "@/lib/brand";
+import {
+  APPLE_TOUCH_ICON,
+  PWA_BACKGROUND_COLOR,
+  PWA_DISPLAY_NAME,
+  PWA_ICON_192,
+  PWA_ICON_512,
+  PWA_ICON_MASKABLE,
+  PWA_THEME_COLOR,
+} from "@/lib/brand";
 import type { MetadataRoute } from "next";
 
 const SITE_ORIGIN =
@@ -6,8 +14,8 @@ const SITE_ORIGIN =
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AfrESH Modeling",
-    short_name: "AfrESH",
+    name: PWA_DISPLAY_NAME,
+    short_name: PWA_DISPLAY_NAME,
     description: "Data-driven talent development and placement.",
     id: `${SITE_ORIGIN}/`,
     start_url: "/",
@@ -18,33 +26,33 @@ export default function manifest(): MetadataRoute.Manifest {
     display_override: ["standalone", "window-controls-overlay", "minimal-ui"],
     prefer_related_applications: false,
     categories: ["business", "lifestyle"],
-    background_color: "#0b0b0d",
-    theme_color: "#c9a84c",
+    background_color: PWA_BACKGROUND_COLOR,
+    theme_color: PWA_THEME_COLOR,
     orientation: "portrait",
     icons: [
       {
-        src: "/icons/icon-192.png",
+        src: PWA_ICON_192,
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: APPLE_TOUCH_ICON,
+        sizes: "180x180",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: PWA_ICON_512,
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: PWA_ICON_MASKABLE,
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
-      },
-      {
-        src: BRAND_LOGO_SRC,
-        sizes: "500x500",
-        type: BRAND_LOGO_MIME,
-        purpose: "any",
       },
     ],
   };

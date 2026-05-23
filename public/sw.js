@@ -1,10 +1,12 @@
-const CACHE_NAME = "afresh-cache-v3";
+const CACHE_NAME = "afresh-cache-v4";
 const CORE_ASSETS = [
   "/",
   "/manifest.webmanifest",
   "/brand-logo.png",
+  "/apple-touch-icon.png",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/icons/icon-512-maskable.png",
 ];
 
 self.addEventListener("install", (event) => {
