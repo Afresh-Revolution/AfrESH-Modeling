@@ -1,4 +1,4 @@
-import { BRAND_LOGO_SRC, BRAND_NAME } from "@/lib/brand";
+import { BRAND_LOGO_SIZE, BRAND_LOGO_SRC, BRAND_NAME } from "@/lib/brand";
 import Image from "next/image";
 
 type LogoSvgProps = {
@@ -19,8 +19,8 @@ export function LogoSvg({
     <Image
       src={BRAND_LOGO_SRC}
       alt={alt}
-      width={height}
-      height={height}
+      width={BRAND_LOGO_SIZE}
+      height={BRAND_LOGO_SIZE}
       className={className ? `brand-logo ${className}` : "brand-logo"}
       style={{ width: "auto", height }}
       sizes={`${height}px`}

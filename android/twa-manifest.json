@@ -2,7 +2,7 @@
   "packageId": "com.afreshmodeling.app",
   "host": "afreshmodeling.com",
   "name": "AfrESH Modeling",
-  "launcherName": "AfrESH",
+  "launcherName": "AfrESH Modeling",
   "display": "standalone",
   "themeColor": "#C9A84C",
   "themeColorDark": "#C9A84C",
@@ -14,7 +14,7 @@
   "enableNotifications": false,
   "startUrl": "/",
   "iconUrl": "https://afreshmodeling.com/icons/icon-512.png",
-  "maskableIconUrl": "https://afreshmodeling.com/icons/icon-512.png",
+  "maskableIconUrl": "https://afreshmodeling.com/icons/icon-512-maskable.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./android.keystore",
