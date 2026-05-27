@@ -3,7 +3,13 @@
 import type { EditorialItem } from "@/lib/types";
 import { RotatingGalleryImage } from "@/components/RotatingGalleryImage";
 
-export function GalleryGrid({ items }: { items: EditorialItem[] }) {
+export function GalleryGrid({
+  items,
+  emptyText,
+}: {
+  items: EditorialItem[];
+  emptyText: string;
+}) {
   const campaignItems = items.filter(
     (item) => typeof item.image_url === "string" && item.image_url.length > 0,
   );
@@ -11,7 +17,7 @@ export function GalleryGrid({ items }: { items: EditorialItem[] }) {
   if (campaignItems.length === 0) {
     return (
       <p className="film-empty reveal">
-        Campaign images uploaded from admin will appear here.
+        {emptyText}
       </p>
     );
   }

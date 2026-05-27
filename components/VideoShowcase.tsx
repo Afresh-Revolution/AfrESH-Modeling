@@ -1,7 +1,14 @@
 import type { CSSProperties } from "react";
 import type { EditorialItem } from "@/lib/types";
+import type { LandingContent } from "@/lib/landingContent";
 
-export function VideoShowcase({ items }: { items: EditorialItem[] }) {
+export function VideoShowcase({
+  items,
+  content,
+}: {
+  items: EditorialItem[];
+  content: LandingContent;
+}) {
   return (
     <section className="section film-section" id="film">
       <div
@@ -17,19 +24,14 @@ export function VideoShowcase({ items }: { items: EditorialItem[] }) {
         <div className="section-header reveal">
           <div>
             <div className="section-label">
-              <span className="line" /> Motion
+              <span className="line" /> {content.film_section_label}
             </div>
-            <h2 className="section-title">Film &amp; Campaign</h2>
-            <p className="section-desc">
-              Moving image from recent productions and brand work across the{" "}
-              <strong style={{ color: "var(--gold)" }}>AfrESH Modeling</strong> roster.
-            </p>
+            <h2 className="section-title">{content.film_section_title}</h2>
+            <p className="section-desc">{content.film_section_description}</p>
           </div>
         </div>
         {items.length === 0 ? (
-          <p className="film-empty reveal">
-            Featured campaign films and motion work will appear here.
-          </p>
+          <p className="film-empty reveal">{content.film_empty_text}</p>
         ) : (
           <div
             className="film-grid reveal"

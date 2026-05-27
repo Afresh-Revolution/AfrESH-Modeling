@@ -1,4 +1,5 @@
 import { getPgPool } from "@/lib/db/postgres";
+import { SignJWT } from "jose";
 import { FALLBACK_HIRE_MODELS } from "./hire-models-fallback";
 import { FALLBACK_EDITORIAL, FALLBACK_ROSTER } from "./roster-fallback";
 import {
@@ -11,6 +12,7 @@ import {
   parseLandingContent,
   type LandingContent,
 } from "./landingContent";
+import { readLocalLandingContentMirror } from "./localLandingContentStore";
 import { createSupabaseAnon } from "./supabase";
 import { imageUrlsForRow, primaryImageUrl } from "@/lib/imageUrls";
 import type { EditorialItem, HireModel, RosterModel } from "./types";
@@ -27,6 +29,37 @@ async function tryFetchFromBackend<T>(path: string): Promise<T | null> {
     const res = await fetch(`${base}${path}`, { cache: "no-store" });
     if (!res.ok) return null;
     return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+function getBackendJwtSecret(): Uint8Array | null {
+  const secret =
+    process.env.JWT_SECRET?.trim() || process.env.ADMIN_SESSION_SECRET?.trim();
+  if (!secret) return null;
+  return new TextEncoder().encode(secret);
+}
+
+async function fetchLandingContentFromAdminBackend(): Promise<LandingContent | null> {
+  const base = backendBase();
+  const secret = getBackendJwtSecret();
+  if (!base || !secret) return null;
+
+  try {
+    const token = await new SignJWT({ role: "admin" })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("2m")
+      .sign(secret);
+
+    const res = await fetch(`${base}/api/admin/landing-content`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { landing_content?: { content?: unknown } };
+    return parseLandingContent(body.landing_content?.content);
   } catch {
     return null;
   }
@@ -334,6 +367,9 @@ export async function fetchSiteMetrics(): Promise<SiteMetrics> {
 }
 
 export async function fetchLandingContent(): Promise<LandingContent> {
+  const localMirror = await readLocalLandingContentMirror();
+  if (localMirror) return localMirror;
+
   const pool = getPgPool();
   if (pool) {
     try {
@@ -364,6 +400,10 @@ export async function fetchLandingContent(): Promise<LandingContent> {
   if (backend?.landing_content?.content) {
     return parseLandingContent(backend.landing_content.content);
   }
+
+  // Fallback for backends that only expose authenticated admin landing-content routes.
+  const adminFallback = await fetchLandingContentFromAdminBackend();
+  if (adminFallback) return adminFallback;
 
   return DEFAULT_LANDING_CONTENT;
 }
