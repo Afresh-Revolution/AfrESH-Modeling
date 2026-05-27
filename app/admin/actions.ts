@@ -12,6 +12,10 @@ import {
 import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  readLocalLandingContentMirror,
+  writeLocalLandingContentMirror,
+} from "@/lib/localLandingContentStore";
 
 export type AdminLoginState = { error?: string } | { ok: true };
 const LOGIN_WINDOW_MS = 10 * 60 * 1000;
@@ -249,6 +253,11 @@ export async function fetchLandingContentForAdmin(): Promise<{
   landing_content: { content: LandingContent };
   setupHint: string | null;
 }> {
+  const localMirror = await readLocalLandingContentMirror();
+  if (localMirror) {
+    return { landing_content: { content: localMirror }, setupHint: null };
+  }
+
   const { landingContentStorageReady, getLandingContentAdmin } = await import(
     "@/lib/adminLandingContent"
   );
@@ -288,6 +297,7 @@ export async function updateLandingContentAction(content: LandingContent) {
   const { landingContentStorageReady, updateLandingContentAdmin } = await import(
     "@/lib/adminLandingContent"
   );
+  await writeLocalLandingContentMirror(content);
 
   if (landingContentStorageReady()) {
     await updateLandingContentAdmin(content);

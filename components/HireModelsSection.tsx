@@ -3,6 +3,7 @@
 import type { HireModel } from "@/lib/types";
 import { imageUrlsForRow } from "@/lib/imageUrls";
 import { RotatingGalleryImage } from "@/components/RotatingGalleryImage";
+import type { LandingContent } from "@/lib/landingContent";
 
 function accomplishmentLines(text: string): string[] {
   return text
@@ -57,7 +58,13 @@ function HireModelCard({ model, index }: { model: HireModel; index: number }) {
   );
 }
 
-export function HireModelsSection({ models }: { models: HireModel[] }) {
+export function HireModelsSection({
+  models,
+  content,
+}: {
+  models: HireModel[];
+  content: LandingContent;
+}) {
   return (
     <section className="section hire-section" id="hire-models">
       <div
@@ -72,18 +79,15 @@ export function HireModelsSection({ models }: { models: HireModel[] }) {
         <div className="section-header reveal">
           <div>
             <div className="section-label">
-              <span className="line" /> Available Talent
+              <span className="line" /> {content.hire_section_label}
             </div>
-            <h2 className="section-title">Hiring Models</h2>
-            <p className="section-desc">
-              Book proven faces for your next campaign, runway, or brand activation. Each profile
-              includes verified experience and recent accomplishments.
-            </p>
+            <h2 className="section-title">{content.hire_section_title}</h2>
+            <p className="section-desc">{content.hire_section_description}</p>
           </div>
         </div>
 
         {models.length === 0 ? (
-          <p className="hire-empty reveal">Featured hire profiles will appear here soon.</p>
+          <p className="hire-empty reveal">{content.hire_empty_text}</p>
         ) : (
           <div className="hire-grid">
             {models.map((model, i) => (
@@ -93,9 +97,9 @@ export function HireModelsSection({ models }: { models: HireModel[] }) {
         )}
 
         <div className="hire-cta reveal">
-          <p>Need a specific look or market? Tell us your brief and we&apos;ll shortlist talent.</p>
-          <a href="mailto:afreshmodeling@gmail.com?subject=Model%20Hiring%20Inquiry" className="btn-primary">
-            Request Talent
+          <p>{content.hire_cta_text}</p>
+          <a href="mailto:info@afreshmodeling.com?subject=Model%20Hiring%20Inquiry" className="btn-primary">
+            {content.hire_cta_button}
           </a>
         </div>
       </div>

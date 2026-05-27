@@ -39,19 +39,19 @@ const FOOTER_MODALS: Record<FooterModalId, FooterModalContent> = {
     title: "Brand Partnerships",
     body: "We connect fashion and lifestyle brands with curated talent for campaigns, ambassador programs, and strategic collaborations designed for measurable impact.",
     ctaLabel: "Contact Partnerships",
-    ctaHref: "mailto:afreshmodeling@gmail.com",
+    ctaHref: "mailto:info@afreshmodeling.com",
   },
   "event-casting": {
     title: "Event Casting",
     body: "From runway shows to private brand activations, we provide casting support, shortlist management, and on-site coordination tailored to your event goals.",
     ctaLabel: "Request Casting Support",
-    ctaHref: "mailto:afreshmodeling@gmail.com",
+    ctaHref: "mailto:info@afreshmodeling.com",
   },
   "content-production": {
     title: "Content Production",
     body: "Our creative team supports editorials, campaign shoots, and social-first content with talent direction and production-ready execution.",
     ctaLabel: "Discuss A Project",
-    ctaHref: "mailto:afreshmodeling@gmail.com",
+    ctaHref: "mailto:info@afreshmodeling.com",
   },
   "privacy-policy": {
     title: "Privacy Policy",
@@ -69,7 +69,7 @@ const FOOTER_MODALS: Record<FooterModalId, FooterModalContent> = {
     title: "Cookie Settings",
     body: "AfrESH Modeling uses cookies and similar technologies to enhance user experience, analyze website performance, and deliver tailored content. Cookies help us understand how visitors interact with our platform, allowing us to improve functionality, design, and overall user experience. These may include essential cookies for site operation and optional cookies for analytics and personalization. Users have the option to manage or disable cookies through their browser settings. Please note that disabling certain cookies may affect the functionality of the website. By continuing to use our platform, you consent to the use of cookies in accordance with this policy.",
     ctaLabel: "Update Cookie Preferences",
-    ctaHref: "mailto:afreshmodeling@gmail.com?subject=Cookie%20Preference%20Request",
+    ctaHref: "mailto:info@afreshmodeling.com?subject=Cookie%20Preference%20Request",
   },
 };
 

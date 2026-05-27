@@ -42,9 +42,9 @@ export default async function HomePage() {
       <LandingPullToRefresh />
       <SiteNav content={landing} />
       <HeroSection content={landing} />
-      <StatsBar metrics={metrics} />
+      <StatsBar metrics={metrics} content={landing} />
 
-      <VideoShowcase items={filmItems} />
+      <VideoShowcase items={filmItems} content={landing} />
 
       <section className="section" id="models">
         <div
@@ -69,7 +69,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <HireModelsSection models={hireModels} />
+      <HireModelsSection models={hireModels} content={landing} />
 
       <section className="section eco-section" id="ecosystem">
         <div
@@ -96,52 +96,37 @@ export default async function HomePage() {
                 <i className="fas fa-search" aria-hidden />
               </div>
               <div className="eco-step">Phase 01</div>
-              <h3 className="eco-title">Global Scouting</h3>
-              <p className="eco-desc">
-                Our scouts identify distinctive faces across 30+ countries using
-                data-driven criteria and instinct.
-              </p>
+              <h3 className="eco-title">{landing.ecosystem_phase_1_title}</h3>
+              <p className="eco-desc">{landing.ecosystem_phase_1_description}</p>
             </div>
             <div className="eco-card reveal reveal-delay-2">
               <div className="eco-icon">
                 <i className="fas fa-gem" aria-hidden />
               </div>
               <div className="eco-step">Phase 02</div>
-              <h3 className="eco-title">Talent Development</h3>
-              <p className="eco-desc">
-                Rigorous training in posing, walk, nutrition, and personal
-                branding with industry mentors.
-              </p>
+              <h3 className="eco-title">{landing.ecosystem_phase_2_title}</h3>
+              <p className="eco-desc">{landing.ecosystem_phase_2_description}</p>
             </div>
             <div className="eco-card reveal reveal-delay-3">
               <div className="eco-icon">
                 <i className="fas fa-rocket" aria-hidden />
               </div>
               <div className="eco-step">Phase 03</div>
-              <h3 className="eco-title">Strategic Placement</h3>
-              <p className="eco-desc">
-                AI-matched casting with agencies, brands, and editorial
-                opportunities worldwide.
-              </p>
+              <h3 className="eco-title">{landing.ecosystem_phase_3_title}</h3>
+              <p className="eco-desc">{landing.ecosystem_phase_3_description}</p>
             </div>
             <div className="eco-card reveal reveal-delay-4">
               <div className="eco-icon">
                 <i className="fas fa-chart-line" aria-hidden />
               </div>
               <div className="eco-step">Phase 04</div>
-              <h3 className="eco-title">Career Management</h3>
-              <p className="eco-desc">
-                Long-term trajectory planning, contract negotiation, and brand
-                partnership curation.
-              </p>
+              <h3 className="eco-title">{landing.ecosystem_phase_4_title}</h3>
+              <p className="eco-desc">{landing.ecosystem_phase_4_description}</p>
             </div>
           </div>
           <div className="eco-arrows reveal">
             <div className="eco-arrow">
-              Scouting <i className="fas fa-chevron-right" aria-hidden />{" "}
-              Development <i className="fas fa-chevron-right" aria-hidden />{" "}
-              Placement <i className="fas fa-chevron-right" aria-hidden />{" "}
-              Management
+              {landing.ecosystem_arrow_text}
             </div>
           </div>
         </div>
@@ -162,15 +147,15 @@ export default async function HomePage() {
           <div className="key-metrics reveal">
             <div className="metric-card">
               <div className="metric-value">{metrics.total_earnings_display}</div>
-              <div className="metric-label">Total Earnings Generated</div>
+              <div className="metric-label">{landing.data_metric_total_earnings_label}</div>
             </div>
             <div className="metric-card">
               <div className="metric-value">{metrics.brand_partnerships.toLocaleString()}</div>
-              <div className="metric-label">Brand Partnerships Active</div>
+              <div className="metric-label">{landing.data_metric_brand_partnerships_label}</div>
             </div>
             <div className="metric-card">
               <div className="metric-value">{metrics.countries_placements.toLocaleString()}</div>
-              <div className="metric-label">Countries With Placements</div>
+              <div className="metric-label">{landing.data_metric_countries_label}</div>
             </div>
           </div>
         </div>
@@ -247,7 +232,7 @@ export default async function HomePage() {
               <p className="section-desc">{landing.gallery_section_description}</p>
             </div>
           </div>
-          <GalleryGrid items={campaignItems} />
+          <GalleryGrid items={campaignItems} emptyText={landing.gallery_empty_text} />
         </div>
       </section>
 

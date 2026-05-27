@@ -1,6 +1,7 @@
 "use client";
 
 import type { SiteMetrics } from "@/lib/siteMetrics";
+import type { LandingContent } from "@/lib/landingContent";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type StatDef = { target: number; label: string; suffix: "plus" | "percent" };
@@ -43,17 +44,23 @@ function StatNumber({
   return <div className="stat-number">{display}</div>;
 }
 
-function statsFromMetrics(m: SiteMetrics): StatDef[] {
+function statsFromMetrics(m: SiteMetrics, content: LandingContent): StatDef[] {
   return [
-    { target: m.models_represented, label: "Models Represented", suffix: "plus" },
-    { target: m.campaigns_delivered, label: "Campaigns Delivered", suffix: "plus" },
-    { target: m.years_excellence, label: "Years of Excellence", suffix: "plus" },
-    { target: m.placement_rate_percent, label: "Placement rate", suffix: "percent" },
+    { target: m.models_represented, label: content.stats_models_label, suffix: "plus" },
+    { target: m.campaigns_delivered, label: content.stats_campaigns_label, suffix: "plus" },
+    { target: m.years_excellence, label: content.stats_years_label, suffix: "plus" },
+    { target: m.placement_rate_percent, label: content.stats_placement_rate_label, suffix: "percent" },
   ];
 }
 
-export function StatsBar({ metrics }: { metrics: SiteMetrics }) {
-  const stats = useMemo(() => statsFromMetrics(metrics), [metrics]);
+export function StatsBar({
+  metrics,
+  content,
+}: {
+  metrics: SiteMetrics;
+  content: LandingContent;
+}) {
+  const stats = useMemo(() => statsFromMetrics(metrics, content), [metrics, content]);
   const ref = useRef<HTMLElement>(null);
   const [active, setActive] = useState(false);
 

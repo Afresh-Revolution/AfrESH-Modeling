@@ -39,7 +39,7 @@ export function HeroSection({ content }: { content: LandingContent }) {
         </div>
       </div>
       <div className="hero-scroll">
-        <span>Scroll</span>
+        <span>{content.hero_scroll_label}</span>
         <div className="scroll-line" />
       </div>
     </section>

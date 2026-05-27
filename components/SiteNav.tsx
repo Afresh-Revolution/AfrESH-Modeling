@@ -51,13 +51,13 @@ export function SiteNav({ content }: { content: LandingContent }) {
           <LogoSvg alt="" priority />
         </a>
         <div className="nav-links">
-          <a href="#models">Models</a>
-          <a href="#hire-models">Hiring</a>
-          <a href="#ecosystem">Ecosystem</a>
-          <a href="#data">Insights</a>
-          <a href="#film">Film</a>
-          <a href="#gallery">Editorial</a>
-          <a href="#apply">Apply</a>
+          <a href="#models">{content.nav_models_label}</a>
+          <a href="#hire-models">{content.nav_hiring_label}</a>
+          <a href="#ecosystem">{content.nav_ecosystem_label}</a>
+          <a href="#data">{content.nav_insights_label}</a>
+          <a href="#film">{content.nav_film_label}</a>
+          <a href="#gallery">{content.nav_editorial_label}</a>
+          <a href="#apply">{content.nav_apply_label}</a>
           <button
             type="button"
             className="nav-cta"
@@ -91,25 +91,25 @@ export function SiteNav({ content }: { content: LandingContent }) {
         aria-label="Mobile navigation"
       >
         <a href="#models" onClick={closeMobile}>
-          Models
+          {content.nav_models_label}
         </a>
         <a href="#hire-models" onClick={closeMobile}>
-          Hiring
+          {content.nav_hiring_label}
         </a>
         <a href="#ecosystem" onClick={closeMobile}>
-          Ecosystem
+          {content.nav_ecosystem_label}
         </a>
         <a href="#data" onClick={closeMobile}>
-          Insights
+          {content.nav_insights_label}
         </a>
         <a href="#film" onClick={closeMobile}>
-          Film
+          {content.nav_film_label}
         </a>
         <a href="#gallery" onClick={closeMobile}>
-          Editorial
+          {content.nav_editorial_label}
         </a>
         <a href="#apply" onClick={closeMobile}>
-          Apply
+          {content.nav_apply_label}
         </a>
       </div>
     </>
