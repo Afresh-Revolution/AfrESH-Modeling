@@ -43,6 +43,12 @@ export default function AdminHomePage() {
             </Link>{" "}
             — homepage stats, key figures, and chart data
           </li>
+          <li>
+            <Link href="/admin/landing" style={{ color: "#c9a84c" }}>
+              Landing content
+            </Link>{" "}
+            — edit homepage copy from hero to footer
+          </li>
         </ul>
       </div>
     </main>

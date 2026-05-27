@@ -11,10 +11,11 @@ if (
 
 const port = process.env.PORT || "8080";
 
+const npxBinary = process.platform === "win32" ? "npx.cmd" : "npx";
 const result = spawnSync(
-  "npx",
+  npxBinary,
   ["next", "start", "-H", "0.0.0.0", "-p", port],
-  { stdio: "inherit", env: process.env, shell: true },
+  { stdio: "inherit", env: process.env },
 );
 
 process.exit(result.status ?? 1);

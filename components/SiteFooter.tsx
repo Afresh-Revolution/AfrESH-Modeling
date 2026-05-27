@@ -2,6 +2,7 @@
 
 import { LogoSvg } from "@/components/LogoSvg";
 import { PwaInstallButton } from "@/components/PwaInstallButton";
+import type { LandingContent } from "@/lib/landingContent";
 import { useEffect, useMemo, useState } from "react";
 
 type FooterModalId =
@@ -72,7 +73,7 @@ const FOOTER_MODALS: Record<FooterModalId, FooterModalContent> = {
   },
 };
 
-export function SiteFooter() {
+export function SiteFooter({ content }: { content: LandingContent }) {
   const [activeModal, setActiveModal] = useState<FooterModalId | null>(null);
   const modalContent = useMemo(
     () => (activeModal ? FOOTER_MODALS[activeModal] : null),
@@ -103,8 +104,7 @@ export function SiteFooter() {
           <div className="footer-brand">
             <LogoSvg height={48} className="footer-logo" />
             <p>
-              Redefining the modeling industry through data-driven talent development and
-              uncompromising standards of elegance.
+              {content.footer_brand_description}
             </p>
             <div className="footer-socials">
               <a href="#" aria-label="Instagram">
@@ -193,32 +193,32 @@ export function SiteFooter() {
             <h4>Contact</h4>
             <ul>
               <li>
-                <a href="#">Jos, Nigeria</a>
+                <a href="#">{content.footer_contact_location}</a>
               </li>
               <li>
-                <a href="mailto:afreshmodeling@gmail.com">afreshmodeling@gmail.com</a>
+                <a href={`mailto:${content.footer_contact_email}`}>{content.footer_contact_email}</a>
               </li>
             </ul>
           </div>
         </div>
         <div className="footer-buttons reveal">
           <a href="#apply" className="footer-btn footer-btn-gold">
-            <i className="fas fa-paper-plane" aria-hidden /> Apply Now
+            <i className="fas fa-paper-plane" aria-hidden /> {content.footer_apply_button}
           </a>
           <a href="#models" className="footer-btn footer-btn-outline">
-            <i className="fas fa-eye" aria-hidden /> View Portfolio
+            <i className="fas fa-eye" aria-hidden /> {content.footer_portfolio_button}
           </a>
           <PwaInstallButton />
-          <a href="mailto:afreshmodeling@gmail.com" className="footer-btn footer-btn-ghost">
-            <i className="fas fa-envelope" aria-hidden /> Contact Us
+          <a href={`mailto:${content.footer_contact_email}`} className="footer-btn footer-btn-ghost">
+            <i className="fas fa-envelope" aria-hidden /> {content.footer_contact_button}
           </a>
         </div>
         <div className="footer-bottom">
           <p>
             <a href="/admin/login" className="footer-admin-year">
-              2026
+              {content.footer_copyright_year}
             </a>{" "}
-            AfrESH Modeling. All rights reserved.
+            {content.footer_copyright_text}
           </p>
           <div className="footer-bottom-links">
             <button type="button" className="footer-link-button" onClick={() => openModal("privacy-policy")}>

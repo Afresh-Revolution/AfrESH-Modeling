@@ -25,11 +25,19 @@ export async function middleware(request: NextRequest) {
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
     if (payload.role !== "admin") {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+      const response = NextResponse.redirect(new URL("/admin/login", request.url));
+      response.cookies.delete("onyxx_admin");
+      return response;
     }
-    return NextResponse.next();
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "no-store, max-age=0");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
   } catch {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    const response = NextResponse.redirect(new URL("/admin/login", request.url));
+    response.cookies.delete("onyxx_admin");
+    return response;
   }
 }
 

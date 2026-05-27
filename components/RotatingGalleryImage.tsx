@@ -46,6 +46,8 @@ export function RotatingGalleryImage({
   if (!urls.length) return null;
 
   const src = urls[index] ?? urls[0];
+  const bypassOptimizer =
+    src.includes("picsum.photos") || src.includes("res.cloudinary.com");
 
   const imageProps = fill
     ? { fill: true as const, sizes: sizes ?? "100vw" }
@@ -63,7 +65,7 @@ export function RotatingGalleryImage({
           src={src}
           alt={alt}
           className={className}
-          unoptimized={src.includes("picsum.photos")}
+          unoptimized={bypassOptimizer}
           {...imageProps}
         />
         {urls.length > 1 ? (

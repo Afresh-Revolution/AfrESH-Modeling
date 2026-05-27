@@ -20,6 +20,7 @@ export default function AdminPanelLayout({
           <Link href="/admin/editorial">Campaigns</Link>
           <Link href="/admin/editorial#film">Film</Link>
           <Link href="/admin/metrics">Metrics</Link>
+          <Link href="/admin/landing">Landing</Link>
           <AdminHeaderControls />
           <form action={adminLogoutAction}>
             <button type="submit" className={`${styles.btn} ${styles.btnGhost}`}>

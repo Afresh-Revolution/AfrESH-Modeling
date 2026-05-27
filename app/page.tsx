@@ -11,16 +11,23 @@ import { ScrollToTopButton } from "@/components/ScrollToTopButton";
 import { StatsBar } from "@/components/StatsBar";
 import { VideoShowcase } from "@/components/VideoShowcase";
 import { HireModelsSection } from "@/components/HireModelsSection";
-import { fetchEditorial, fetchHireModels, fetchRoster, fetchSiteMetrics } from "@/lib/data";
+import {
+  fetchEditorial,
+  fetchHireModels,
+  fetchLandingContent,
+  fetchRoster,
+  fetchSiteMetrics,
+} from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [roster, editorial, hireModels, metrics] = await Promise.all([
+  const [roster, editorial, hireModels, metrics, landing] = await Promise.all([
     fetchRoster(),
     fetchEditorial(),
     fetchHireModels(),
     fetchSiteMetrics(),
+    fetchLandingContent(),
   ]);
   const filmItems = editorial.filter(
     (e) => typeof e.video_url === "string" && e.video_url.length > 0,
@@ -33,8 +40,8 @@ export default async function HomePage() {
     <>
       <LandingLiveUpdates />
       <LandingPullToRefresh />
-      <SiteNav />
-      <HeroSection />
+      <SiteNav content={landing} />
+      <HeroSection content={landing} />
       <StatsBar metrics={metrics} />
 
       <VideoShowcase items={filmItems} />
@@ -52,14 +59,10 @@ export default async function HomePage() {
           <div className="section-header reveal">
             <div>
               <div className="section-label">
-                <span className="line" /> Featured Talent
+                <span className="line" /> {landing.models_section_label}
               </div>
-              <h2 className="section-title">Our Roster</h2>
-              <p className="section-desc">
-                Discover the faces that define{" "}
-                <strong style={{ color: "var(--gold)" }}>AfrESH Modeling</strong> —
-                each selected for their unique presence and professional drive.
-              </p>
+              <h2 className="section-title">{landing.models_section_title}</h2>
+              <p className="section-desc">{landing.models_section_description}</p>
             </div>
           </div>
           <ModelsCarousel models={roster} />
@@ -81,17 +84,10 @@ export default async function HomePage() {
           <div className="section-header reveal">
             <div>
               <div className="section-label">
-                <span className="line" /> Our Process
+                <span className="line" /> {landing.ecosystem_section_label}
               </div>
-              <h2 className="section-title">The AfrESH Modeling Ecosystem</h2>
-              <p className="section-desc">
-                A{" "}
-                <strong style={{ color: "var(--fg)" }}>
-                  scientifically structured
-                </strong>{" "}
-                pipeline that transforms raw potential into industry-leading
-                talent.
-              </p>
+              <h2 className="section-title">{landing.ecosystem_section_title}</h2>
+              <p className="section-desc">{landing.ecosystem_section_description}</p>
             </div>
           </div>
           <div className="eco-flow">
@@ -156,16 +152,10 @@ export default async function HomePage() {
           <div className="section-header reveal">
             <div>
               <div className="section-label">
-                <span className="line" /> Performance Metrics
+                <span className="line" /> {landing.data_section_label}
               </div>
-              <h2 className="section-title">By The Numbers</h2>
-              <p className="section-desc">
-                Data-driven results that validate our approach to{" "}
-                <strong style={{ color: "var(--fg)" }}>
-                  model development
-                </strong>{" "}
-                and market placement.
-              </p>
+              <h2 className="section-title">{landing.data_section_title}</h2>
+              <p className="section-desc">{landing.data_section_description}</p>
             </div>
           </div>
           <DataCharts metrics={metrics} />
@@ -199,48 +189,41 @@ export default async function HomePage() {
         <div className="section-inner">
           <div className="reveal">
             <div className="section-label">
-              <span className="line" /> Open Call
+              <span className="line" /> {landing.apply_section_label}
             </div>
-            <h2 className="section-title">Become Part of AfrESH Modeling</h2>
+            <h2 className="section-title">{landing.apply_section_title}</h2>
             <p className="section-desc" style={{ marginBottom: 0 }}>
-              We are always looking for extraordinary individuals. Submit your
-              application below.
+              {landing.apply_section_description}
             </p>
           </div>
           <div className="apply-grid">
             <div className="apply-info reveal reveal-delay-1">
-              <h3>What We Look For</h3>
-              <p>
-                AfrESH Modeling represents a curated selection of talent. Our
-                scouting process is both intuitive and analytical, seeking
-                individuals who bring something unmistakable to the industry.
-              </p>
+              <h3>{landing.apply_requirements_title}</h3>
+              <p>{landing.apply_requirements_intro}</p>
               <ul className="apply-requirements">
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  Height preference: 5&apos;8&quot; and above for women,
-                  6&apos;0&quot; and above for men
+                  {landing.apply_requirement_1}
                 </li>
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  Strong facial bone structure and unique features
+                  {landing.apply_requirement_2}
                 </li>
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  Professional attitude and reliability
+                  {landing.apply_requirement_3}
                 </li>
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  No prior experience required — we develop raw talent
+                  {landing.apply_requirement_4}
                 </li>
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  Must be 16 years or older to apply
+                  {landing.apply_requirement_5}
                 </li>
                 <li>
                   <i className="fas fa-circle" aria-hidden />
-                  Open to all ethnicities, body types within our diverse
-                  categories
+                  {landing.apply_requirement_6}
                 </li>
               </ul>
             </div>
@@ -258,24 +241,17 @@ export default async function HomePage() {
           <div className="section-header reveal">
             <div>
               <div className="section-label">
-                <span className="line" /> Editorial
+                <span className="line" /> {landing.gallery_section_label}
               </div>
-              <h2 className="section-title">Recent Campaigns</h2>
-              <p className="section-desc">
-                A glimpse into the campaigns and editorial work produced through
-                the{" "}
-                <strong style={{ color: "var(--gold)" }}>
-                  AfrESH Modeling ecosystem
-                </strong>
-                .
-              </p>
+              <h2 className="section-title">{landing.gallery_section_title}</h2>
+              <p className="section-desc">{landing.gallery_section_description}</p>
             </div>
           </div>
           <GalleryGrid items={campaignItems} />
         </div>
       </section>
 
-      <SiteFooter />
+      <SiteFooter content={landing} />
       <ScrollToTopButton />
     </>
   );

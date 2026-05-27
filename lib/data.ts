@@ -6,6 +6,11 @@ import {
   parseSiteMetricsRow,
   type SiteMetrics,
 } from "./siteMetrics";
+import {
+  DEFAULT_LANDING_CONTENT,
+  parseLandingContent,
+  type LandingContent,
+} from "./landingContent";
 import { createSupabaseAnon } from "./supabase";
 import { imageUrlsForRow, primaryImageUrl } from "@/lib/imageUrls";
 import type { EditorialItem, HireModel, RosterModel } from "./types";
@@ -326,4 +331,39 @@ export async function fetchSiteMetrics(): Promise<SiteMetrics> {
   }
 
   return DEFAULT_SITE_METRICS;
+}
+
+export async function fetchLandingContent(): Promise<LandingContent> {
+  const pool = getPgPool();
+  if (pool) {
+    try {
+      const { rows } = await pool.query(`SELECT content FROM landing_content WHERE id = 1`);
+      if (rows.length) {
+        return parseLandingContent((rows[0] as { content?: unknown }).content);
+      }
+    } catch (e) {
+      console.error("[fetchLandingContent] postgres:", e);
+    }
+  }
+
+  const supabase = createSupabaseAnon();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("landing_content")
+      .select("content")
+      .eq("id", 1)
+      .maybeSingle();
+    if (!error && data) {
+      return parseLandingContent((data as { content?: unknown }).content);
+    }
+  }
+
+  const backend = await tryFetchFromBackend<{ landing_content?: { content?: unknown } }>(
+    "/api/landing-content"
+  );
+  if (backend?.landing_content?.content) {
+    return parseLandingContent(backend.landing_content.content);
+  }
+
+  return DEFAULT_LANDING_CONTENT;
 }
