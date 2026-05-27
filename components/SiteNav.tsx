@@ -1,13 +1,14 @@
 "use client";
 
 import { LogoSvg } from "@/components/LogoSvg";
+import type { LandingContent } from "@/lib/landingContent";
 import { useCallback, useEffect, useState } from "react";
 
 function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
-export function SiteNav() {
+export function SiteNav({ content }: { content: LandingContent }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -62,7 +63,7 @@ export function SiteNav() {
             className="nav-cta"
             onClick={() => scrollToId("apply")}
           >
-            Join Us
+            {content.footer_apply_button}
           </button>
         </div>
         <button

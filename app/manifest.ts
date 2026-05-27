@@ -9,15 +9,13 @@ import {
 } from "@/lib/brand";
 import type { MetadataRoute } from "next";
 
-const SITE_ORIGIN =
-  process.env.PUBLIC_SITE_URL?.replace(/\/$/, "") || "https://afreshmodeling.com";
-
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: PWA_DISPLAY_NAME,
     short_name: PWA_DISPLAY_NAME,
     description: "Data-driven talent development and placement.",
-    id: `${SITE_ORIGIN}/`,
+    // Keep id same-origin in every environment (localhost, preview, production).
+    id: "/",
     start_url: "/",
     scope: "/",
     lang: "en",

@@ -2,19 +2,60 @@
 
 import type { SiteMetrics } from "@/lib/siteMetrics";
 import {
+  DEFAULT_LANDING_CONTENT,
+  type LandingContent,
+} from "@/lib/landingContent";
+import {
   getAdminAccessToken,
   verifyAdminSession,
 } from "@/lib/admin-session";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export type AdminLoginState = { error?: string } | { ok: true };
+const LOGIN_WINDOW_MS = 10 * 60 * 1000;
+const MAX_LOGIN_ATTEMPTS = 8;
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+
+function backendCandidates(): string[] {
+  const envCandidates = [
+    process.env.BASE_URL,
+    process.env.NEXT_PUBLIC_BASE_URL,
+    // Handy local fallbacks for dev when deployed API URL is unreachable.
+    process.env.NODE_ENV !== "production" ? "http://127.0.0.1:4000" : undefined,
+    process.env.NODE_ENV !== "production" ? "http://localhost:4000" : undefined,
+  ]
+    .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+    .map((x) => x.trim().replace(/\/$/, ""));
+
+  return Array.from(new Set(envCandidates));
+}
 
 function backendBase() {
-  const base = process.env.BASE_URL?.replace(/\/$/, "");
-  if (!base) throw new Error("BASE_URL is not set");
-  return base;
+  const [first] = backendCandidates();
+  if (!first) throw new Error("BASE_URL is not set");
+  return first;
+}
+
+async function fetchBackendWithFallback(
+  path: string,
+  init?: RequestInit
+): Promise<Response> {
+  const candidates = backendCandidates();
+  if (!candidates.length) throw new Error("BASE_URL is not set");
+
+  let lastError: unknown = null;
+  for (const base of candidates) {
+    try {
+      const res = await fetch(`${base}${path}`, init);
+      return res;
+    } catch (e) {
+      lastError = e;
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("API is unreachable");
 }
 
 async function authHeaders(): Promise<HeadersInit> {
@@ -25,7 +66,7 @@ async function authHeaders(): Promise<HeadersInit> {
 async function adminFetch(path: string, init?: RequestInit) {
   await verifyAdminSession();
   const headers = await authHeaders();
-  return fetch(`${backendBase()}${path}`, {
+  return fetchBackendWithFallback(path, {
     ...init,
     cache: "no-store",
     headers: {
@@ -35,29 +76,50 @@ async function adminFetch(path: string, init?: RequestInit) {
   });
 }
 
+async function getClientIp() {
+  const requestHeaders = await headers();
+  const forwarded = requestHeaders.get("x-forwarded-for")?.trim();
+  if (forwarded) return forwarded.split(",")[0]?.trim() ?? "unknown";
+  return requestHeaders.get("x-real-ip")?.trim() || "unknown";
+}
+
 export async function adminLoginAction(
   _prev: AdminLoginState,
   formData: FormData
 ): Promise<AdminLoginState> {
+  const ip = await getClientIp();
+  const now = Date.now();
+  const existing = loginAttempts.get(ip);
+  if (existing && existing.resetAt > now && existing.count >= MAX_LOGIN_ATTEMPTS) {
+    return { error: "Too many attempts. Please wait a few minutes and try again." };
+  }
+
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   if (!email || !password) {
     return { error: "Email and password are required" };
   }
 
-  let base: string;
   try {
-    base = backendBase();
+    backendBase();
   } catch {
     return { error: "Sign-in is not available right now. Please try again later." };
   }
 
-  const res = await fetch(`${base}/api/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    cache: "no-store",
-    body: JSON.stringify({ email, password }),
-  });
+  let res: Response;
+  try {
+    res = await fetchBackendWithFallback("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      body: JSON.stringify({ email, password }),
+    });
+  } catch {
+    return {
+      error:
+        "Cannot reach the API right now. Start afreshmodeling-logic on port 4000 or update BASE_URL.",
+    };
+  }
 
   const data = (await res.json().catch(() => ({}))) as {
     error?: string;
@@ -65,15 +127,23 @@ export async function adminLoginAction(
   };
 
   if (!res.ok || !data.token) {
+    const current = loginAttempts.get(ip);
+    if (!current || current.resetAt <= now) {
+      loginAttempts.set(ip, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    } else {
+      loginAttempts.set(ip, { ...current, count: current.count + 1 });
+    }
     return { error: data.error ?? "Invalid email or password" };
   }
+  loginAttempts.delete(ip);
 
   (await cookies()).set("onyxx_admin", data.token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     path: "/",
     maxAge: 60 * 60 * 8,
+    priority: "high",
   });
 
   return { ok: true };
@@ -173,6 +243,76 @@ export async function updateSiteMetricsAction(metrics: SiteMetrics) {
   }
   revalidatePath("/");
   revalidatePath("/admin/metrics");
+}
+
+export async function fetchLandingContentForAdmin(): Promise<{
+  landing_content: { content: LandingContent };
+  setupHint: string | null;
+}> {
+  const { landingContentStorageReady, getLandingContentAdmin } = await import(
+    "@/lib/adminLandingContent"
+  );
+
+  if (landingContentStorageReady()) {
+    const content = await getLandingContentAdmin();
+    return { landing_content: { content }, setupHint: null };
+  }
+
+  const res = await adminFetch("/api/admin/landing-content");
+  if (res.ok) {
+    const data = (await res.json()) as {
+      landing_content?: { content?: Record<string, unknown> };
+    };
+    const { parseLandingContent } = await import("@/lib/landingContent");
+    return {
+      landing_content: {
+        content: parseLandingContent(data.landing_content?.content),
+      },
+      setupHint: null,
+    };
+  }
+
+  if (res.status === 404) {
+    return {
+      landing_content: { content: DEFAULT_LANDING_CONTENT },
+      setupHint:
+        "Landing API is not deployed yet. Redeploy afreshmodeling-logic, or set DATABASE_URL in .env to save edits directly.",
+    };
+  }
+
+  const j = (await res.json().catch(() => ({}))) as { error?: string };
+  throw new Error(j.error ?? "Could not load landing content.");
+}
+
+export async function updateLandingContentAction(content: LandingContent) {
+  const { landingContentStorageReady, updateLandingContentAdmin } = await import(
+    "@/lib/adminLandingContent"
+  );
+
+  if (landingContentStorageReady()) {
+    await updateLandingContentAdmin(content);
+    revalidatePath("/");
+    revalidatePath("/admin/landing");
+    return;
+  }
+
+  const res = await adminFetch("/api/admin/landing-content", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+  });
+  if (!res.ok) {
+    const j = (await res.json().catch(() => ({}))) as { error?: string };
+    const msg = j.error ?? "Could not save landing content.";
+    if (res.status === 404) {
+      throw new Error(
+        `${msg} Redeploy afreshmodeling-logic with landing-content routes, or set DATABASE_URL in .env.`
+      );
+    }
+    throw new Error(msg);
+  }
+  revalidatePath("/");
+  revalidatePath("/admin/landing");
 }
 
 export async function createRosterEntry(formData: FormData) {

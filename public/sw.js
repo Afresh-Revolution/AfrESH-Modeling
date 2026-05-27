@@ -1,4 +1,4 @@
-const CACHE_NAME = "afresh-cache-v4";
+const CACHE_NAME = "afresh-cache-v5";
 const CORE_ASSETS = [
   "/",
   "/manifest.webmanifest",
@@ -21,7 +21,12 @@ self.addEventListener("activate", (event) => {
       .then((names) =>
         Promise.all(names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name)))
       )
-      .then(() => self.clients.claim())
+      .then(async () => {
+        if (self.registration.navigationPreload) {
+          await self.registration.navigationPreload.disable();
+        }
+        await self.clients.claim();
+      })
   );
 });
 
@@ -37,6 +42,23 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith("/_next/")) return;
+  if (request.headers.get("accept")?.includes("text/x-component")) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(
+      (async () => {
+        try {
+          const preload = await event.preloadResponse;
+          if (preload) return preload;
+          return await fetch(request);
+        } catch {
+          return (await caches.match("/")) ?? Response.error();
+        }
+      })()
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then((cached) => {

@@ -1,39 +1,40 @@
 "use client";
 
 import { HeroCanvas } from "@/components/HeroCanvas";
+import type { LandingContent } from "@/lib/landingContent";
 
 function scrollToId(id: string) {
   if (typeof document === "undefined") return;
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
-export function HeroSection() {
+export function HeroSection({ content }: { content: LandingContent }) {
   return (
     <section className="hero-section" id="hero">
       <HeroCanvas />
       <div className="hero-overlay">
         <div className="hero-badge">
           <span className="dot" />
-          Now Accepting Applications
+          {content.hero_badge}
         </div>
         <h1 className="hero-title">
-          AfrESH <span>Modeling</span>
+          {content.hero_title_prefix} <span>{content.hero_title_highlight}</span>
         </h1>
-        <p className="hero-subtitle">Where Elegance Meets Excellence</p>
+        <p className="hero-subtitle">{content.hero_subtitle}</p>
         <div className="hero-actions">
           <button
             type="button"
             className="btn-primary"
             onClick={() => scrollToId("models")}
           >
-            View Our Talent
+            {content.hero_primary_cta}
           </button>
           <button
             type="button"
             className="btn-secondary"
             onClick={() => scrollToId("apply")}
           >
-            Apply Now
+            {content.hero_secondary_cta}
           </button>
         </div>
       </div>
