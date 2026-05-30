@@ -14,7 +14,7 @@ export type SiteMetrics = {
 };
 
 export const DEFAULT_SITE_METRICS: SiteMetrics = {
-  total_earnings_display: "$4.2M",
+  total_earnings_display: "₦6.5B",
   brand_partnerships: 87,
   countries_placements: 32,
   models_represented: 250,

@@ -1,8 +1,10 @@
 "use server";
 
 import type { SiteMetrics } from "@/lib/siteMetrics";
+import { parseSiteMetricsRow } from "@/lib/siteMetrics";
 import {
   DEFAULT_LANDING_CONTENT,
+  parseLandingContent,
   type LandingContent,
 } from "@/lib/landingContent";
 import {
@@ -235,7 +237,7 @@ export async function fetchSiteMetricsForAdmin() {
   return res.json() as Promise<{ metrics: Record<string, unknown> }>;
 }
 
-export async function updateSiteMetricsAction(metrics: SiteMetrics) {
+export async function updateSiteMetricsAction(metrics: SiteMetrics): Promise<SiteMetrics> {
   const res = await adminFetch("/api/admin/site-metrics", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
@@ -245,19 +247,17 @@ export async function updateSiteMetricsAction(metrics: SiteMetrics) {
     const j = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(j.error ?? "Could not save metrics.");
   }
+  const data = (await res.json()) as { metrics?: Record<string, unknown> };
+  const saved = parseSiteMetricsRow(data.metrics ?? {});
   revalidatePath("/");
   revalidatePath("/admin/metrics");
+  return saved;
 }
 
 export async function fetchLandingContentForAdmin(): Promise<{
   landing_content: { content: LandingContent };
   setupHint: string | null;
 }> {
-  const localMirror = await readLocalLandingContentMirror();
-  if (localMirror) {
-    return { landing_content: { content: localMirror }, setupHint: null };
-  }
-
   const { landingContentStorageReady, getLandingContentAdmin } = await import(
     "@/lib/adminLandingContent"
   );
@@ -272,13 +272,17 @@ export async function fetchLandingContentForAdmin(): Promise<{
     const data = (await res.json()) as {
       landing_content?: { content?: Record<string, unknown> };
     };
-    const { parseLandingContent } = await import("@/lib/landingContent");
+    const content = parseLandingContent(data.landing_content?.content);
+    await writeLocalLandingContentMirror(content);
     return {
-      landing_content: {
-        content: parseLandingContent(data.landing_content?.content),
-      },
+      landing_content: { content },
       setupHint: null,
     };
+  }
+
+  const localMirror = await readLocalLandingContentMirror();
+  if (localMirror) {
+    return { landing_content: { content: localMirror }, setupHint: null };
   }
 
   if (res.status === 404) {
@@ -293,17 +297,19 @@ export async function fetchLandingContentForAdmin(): Promise<{
   throw new Error(j.error ?? "Could not load landing content.");
 }
 
-export async function updateLandingContentAction(content: LandingContent) {
+export async function updateLandingContentAction(
+  content: LandingContent
+): Promise<LandingContent> {
   const { landingContentStorageReady, updateLandingContentAdmin } = await import(
     "@/lib/adminLandingContent"
   );
-  await writeLocalLandingContentMirror(content);
 
   if (landingContentStorageReady()) {
-    await updateLandingContentAdmin(content);
+    const saved = await updateLandingContentAdmin(content);
+    await writeLocalLandingContentMirror(saved);
     revalidatePath("/");
     revalidatePath("/admin/landing");
-    return;
+    return saved;
   }
 
   const res = await adminFetch("/api/admin/landing-content", {
@@ -321,8 +327,15 @@ export async function updateLandingContentAction(content: LandingContent) {
     }
     throw new Error(msg);
   }
+
+  const data = (await res.json()) as {
+    landing_content?: { content?: Record<string, unknown> };
+  };
+  const saved = parseLandingContent(data.landing_content?.content ?? content);
+  await writeLocalLandingContentMirror(saved);
   revalidatePath("/");
   revalidatePath("/admin/landing");
+  return saved;
 }
 
 export async function createRosterEntry(formData: FormData) {

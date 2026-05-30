@@ -367,8 +367,12 @@ export async function fetchSiteMetrics(): Promise<SiteMetrics> {
 }
 
 export async function fetchLandingContent(): Promise<LandingContent> {
-  const localMirror = await readLocalLandingContentMirror();
-  if (localMirror) return localMirror;
+  const backend = await tryFetchFromBackend<{ landing_content?: { content?: unknown } }>(
+    "/api/landing-content"
+  );
+  if (backend?.landing_content?.content) {
+    return parseLandingContent(backend.landing_content.content);
+  }
 
   const pool = getPgPool();
   if (pool) {
@@ -394,16 +398,11 @@ export async function fetchLandingContent(): Promise<LandingContent> {
     }
   }
 
-  const backend = await tryFetchFromBackend<{ landing_content?: { content?: unknown } }>(
-    "/api/landing-content"
-  );
-  if (backend?.landing_content?.content) {
-    return parseLandingContent(backend.landing_content.content);
-  }
-
-  // Fallback for backends that only expose authenticated admin landing-content routes.
   const adminFallback = await fetchLandingContentFromAdminBackend();
   if (adminFallback) return adminFallback;
+
+  const localMirror = await readLocalLandingContentMirror();
+  if (localMirror) return localMirror;
 
   return DEFAULT_LANDING_CONTENT;
 }

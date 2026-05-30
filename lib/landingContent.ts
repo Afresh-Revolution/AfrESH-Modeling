@@ -129,7 +129,7 @@ export const DEFAULT_LANDING_CONTENT: LandingContent = {
   stats_campaigns_label: "Campaigns Delivered",
   stats_years_label: "Years of Excellence",
   stats_placement_rate_label: "Placement rate",
-  data_metric_total_earnings_label: "Total Earnings Generated",
+  data_metric_total_earnings_label: "Total Earnings Generated (₦)",
   data_metric_brand_partnerships_label: "Brand Partnerships Active",
   data_metric_countries_label: "Countries With Placements",
   apply_section_label: "Open Call",
