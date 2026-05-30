@@ -4,8 +4,7 @@ import { updateLandingContentAction } from "../../actions";
 import styles from "../../admin.module.scss";
 import type { LandingContent } from "@/lib/landingContent";
 import { emitContentUpdate } from "@/lib/contentSync";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 const FIELD_META: Array<{ key: keyof LandingContent; label: string; multiline?: boolean }> = [
   { key: "nav_models_label", label: "Nav models label" },
@@ -89,15 +88,10 @@ export default function LandingContentEditor({
   initial: LandingContent;
   setupHint?: string | null;
 }) {
-  const router = useRouter();
   const [content, setContent] = useState<LandingContent>(initial);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const fields = useMemo(() => FIELD_META, []);
-
-  useEffect(() => {
-    setContent(initial);
-  }, [initial]);
 
   return (
     <main className={styles.adminMain}>
@@ -119,10 +113,10 @@ export default function LandingContentEditor({
           setSaving(true);
           setNotice(null);
           try {
-            await updateLandingContentAction(content);
+            const saved = await updateLandingContentAction(content);
+            setContent(saved);
             emitContentUpdate("landing-content-update");
             setNotice({ kind: "ok", text: "Landing page content saved." });
-            router.refresh();
           } catch (err) {
             setNotice({
               kind: "err",

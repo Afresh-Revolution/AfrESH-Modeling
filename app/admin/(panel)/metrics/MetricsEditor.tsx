@@ -3,7 +3,7 @@
 import { updateSiteMetricsAction } from "../../actions";
 import styles from "../../admin.module.scss";
 import type { CategorySlice, SiteMetrics, YearRate } from "@/lib/siteMetrics";
-import { useRouter } from "next/navigation";
+import { emitContentUpdate } from "@/lib/contentSync";
 import { useState } from "react";
 
 function clone<T>(x: T): T {
@@ -11,7 +11,6 @@ function clone<T>(x: T): T {
 }
 
 export function MetricsEditor({ initial }: { initial: SiteMetrics }) {
-  const router = useRouter();
   const [m, setM] = useState<SiteMetrics>(() => clone(initial));
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
@@ -91,9 +90,10 @@ export function MetricsEditor({ initial }: { initial: SiteMetrics }) {
           }
           setSaving(true);
           try {
-            await updateSiteMetricsAction(m);
+            const saved = await updateSiteMetricsAction(m);
+            setM(clone(saved));
+            emitContentUpdate("site-metrics-update");
             setNotice({ kind: "ok", text: "Saved. Homepage updated." });
-            router.refresh();
           } catch (err) {
             setNotice({
               kind: "err",
@@ -110,14 +110,14 @@ export function MetricsEditor({ initial }: { initial: SiteMetrics }) {
         <div className={styles.formGrid}>
           <div>
             <label className={styles.label} htmlFor="earn">
-              Total earnings (display text)
+              Total earnings (Naira display text)
             </label>
             <input
               id="earn"
               className={styles.input}
               value={m.total_earnings_display}
               onChange={(e) => setM((p) => ({ ...p, total_earnings_display: e.target.value }))}
-              placeholder="$4.2M"
+              placeholder="₦6.5B"
             />
           </div>
           <div>
