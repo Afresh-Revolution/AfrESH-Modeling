@@ -1,5 +1,6 @@
 "use client";
 
+import { AdminConfirmDialog } from "../AdminConfirmDialog";
 import {
   setApplicationStatus,
   type SetApplicationStatusResult,
@@ -7,14 +8,57 @@ import {
 import styles from "../../admin.module.scss";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 
-const STATUSES = ["new", "reviewed", "shortlisted", "rejected", "archived"] as const;
+const STATUSES = [
+  "new",
+  "reviewed",
+  "shortlisted",
+  "rejected",
+  "accepted",
+  "denied",
+  "archived",
+] as const;
 
-const STATUS_LABEL: Record<(typeof STATUSES)[number], string> = {
+type Status = (typeof STATUSES)[number];
+
+const STATUS_LABEL: Record<Status, string> = {
   new: "New",
   reviewed: "Reviewed",
   shortlisted: "Shortlisted",
   rejected: "Rejected",
+  accepted: "Accepted",
+  denied: "Denied",
   archived: "Archived",
+};
+
+const EMAIL_CONFIRM: Partial<
+  Record<
+    Status,
+    {
+      title: string;
+      body: string;
+      confirmLabel: string;
+      variant: "danger" | "gold";
+    }
+  >
+> = {
+  rejected: {
+    title: "Reject this application?",
+    body: "The applicant will receive an email letting them know their application will not move forward.",
+    confirmLabel: "Reject and send email",
+    variant: "danger",
+  },
+  accepted: {
+    title: "Accept into the agency?",
+    body: "The applicant will receive a welcome email. You will contact them when sessions begin.",
+    confirmLabel: "Accept and send email",
+    variant: "gold",
+  },
+  denied: {
+    title: "Deny after audition?",
+    body: "The applicant will receive an email letting them know they were not accepted following their interview.",
+    confirmLabel: "Deny and send email",
+    variant: "danger",
+  },
 };
 
 function defaultInterviewLocal(): string {
@@ -33,24 +77,41 @@ export function ApplicationStatusSelect({
   const [pending, start] = useTransition();
   const [localValue, setLocalValue] = useState(value || "new");
   const [emailNote, setEmailNote] = useState<string | null>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmStatus, setConfirmStatus] = useState<Status | null>(null);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+  const interviewDialogRef = useRef<HTMLDialogElement>(null);
   const modalId = useId();
 
   useEffect(() => {
     setLocalValue(value || "new");
   }, [value]);
 
-  function applyResult(result: SetApplicationStatusResult) {
+  function closeConfirm() {
+    if (pending) return;
+    setConfirmOpen(false);
+    setConfirmStatus(null);
+    setConfirmError(null);
+  }
+
+  function applyResult(result: SetApplicationStatusResult, onSuccess?: () => void) {
     if (!result.ok) {
-      window.alert(result.error);
+      setActionError(result.error);
+      setConfirmError(result.error);
       return;
     }
+    setActionError(null);
+    setConfirmError(null);
     if (result.emailError) {
       setEmailNote(result.emailError);
     } else {
       setEmailNote(null);
     }
+    onSuccess?.();
   }
+
+  const confirmMeta = confirmStatus ? EMAIL_CONFIRM[confirmStatus] : null;
 
   return (
     <div style={{ minWidth: 140 }}>
@@ -59,31 +120,26 @@ export function ApplicationStatusSelect({
         disabled={pending}
         value={localValue}
         onChange={(e) => {
-          const next = e.target.value;
+          const next = e.target.value as Status;
           setEmailNote(null);
+          setActionError(null);
+
           if (next === "shortlisted") {
-            queueMicrotask(() => dialogRef.current?.showModal());
+            queueMicrotask(() => interviewDialogRef.current?.showModal());
             return;
           }
-          if (next === "rejected") {
-            if (
-              !window.confirm(
-                "Mark as rejected and send the rejection email to this applicant?"
-              )
-            ) {
-              return;
-            }
-            start(async () => {
-              const r = await setApplicationStatus(id, "rejected");
-              applyResult(r);
-              if (r.ok) setLocalValue("rejected");
-            });
+
+          const meta = EMAIL_CONFIRM[next];
+          if (meta) {
+            setConfirmStatus(next);
+            setConfirmError(null);
+            setConfirmOpen(true);
             return;
           }
+
           start(async () => {
             const r = await setApplicationStatus(id, next);
-            applyResult(r);
-            if (r.ok) setLocalValue(next);
+            applyResult(r, () => setLocalValue(next));
           });
         }}
         aria-label="Submission status"
@@ -94,18 +150,50 @@ export function ApplicationStatusSelect({
           </option>
         ))}
       </select>
+
       {emailNote ? (
         <p className={styles.inlineError} style={{ marginTop: "0.35rem", fontSize: "0.72rem" }}>
           {emailNote}
         </p>
       ) : null}
 
+      {actionError && !confirmOpen ? (
+        <p className={styles.inlineError} style={{ marginTop: "0.35rem", fontSize: "0.72rem" }}>
+          {actionError}
+        </p>
+      ) : null}
+
+      {confirmMeta && confirmStatus ? (
+        <AdminConfirmDialog
+          open={confirmOpen}
+          title={confirmMeta.title}
+          confirmLabel={confirmMeta.confirmLabel}
+          variant={confirmMeta.variant}
+          pending={pending}
+          error={confirmError}
+          onCancel={closeConfirm}
+          onConfirm={() => {
+            setConfirmError(null);
+            start(async () => {
+              const r = await setApplicationStatus(id, confirmStatus);
+              applyResult(r, () => {
+                setLocalValue(confirmStatus);
+                setConfirmOpen(false);
+                setConfirmStatus(null);
+              });
+            });
+          }}
+        >
+          {confirmMeta.body}
+        </AdminConfirmDialog>
+      ) : null}
+
       <dialog
-        ref={dialogRef}
+        ref={interviewDialogRef}
         id={modalId}
         className={styles.shortlistDialog}
         onClick={(ev) => {
-          if (ev.target === dialogRef.current) dialogRef.current?.close();
+          if (ev.target === interviewDialogRef.current) interviewDialogRef.current?.close();
         }}
       >
         <form
@@ -117,11 +205,10 @@ export function ApplicationStatusSelect({
             const iso = new Date(raw).toISOString();
             start(async () => {
               const r = await setApplicationStatus(id, "shortlisted", iso);
-              applyResult(r);
-              if (r.ok) {
+              applyResult(r, () => {
                 setLocalValue("shortlisted");
-                dialogRef.current?.close();
-              }
+                interviewDialogRef.current?.close();
+              });
             });
           }}
         >
@@ -141,17 +228,24 @@ export function ApplicationStatusSelect({
             required
             defaultValue={defaultInterviewLocal()}
           />
-          <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", justifyContent: "flex-end" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              marginTop: "1rem",
+              justifyContent: "flex-end",
+            }}
+          >
             <button
               type="button"
               className={`${styles.btn} ${styles.btnGhost}`}
               disabled={pending}
-              onClick={() => dialogRef.current?.close()}
+              onClick={() => interviewDialogRef.current?.close()}
             >
               Cancel
             </button>
             <button type="submit" className={`${styles.btn} ${styles.btnGold}`} disabled={pending}>
-              {pending ? "Saving…" : "Confirm & email"}
+              {pending ? "Saving…" : "Confirm and email"}
             </button>
           </div>
         </form>

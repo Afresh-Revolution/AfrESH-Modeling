@@ -41,16 +41,21 @@ function AboutCell({ message }: { message: unknown }) {
 }
 
 export default async function AdminApplicationsPage() {
-  const { applications } = await fetchApplicationsJson();
+  const { applications, loadError } = await fetchApplicationsJson();
 
   return (
     <main className={styles.adminMain}>
       <h1 className={styles.adminTitle}>Model submissions</h1>
       <p className={styles.adminSubtitle}>
-        Applications people send in from the public &ldquo;Apply&rdquo; page on the site. Choosing
-        Shortlisted or Rejected sends an email via Resend (configure{" "}
-        <code style={{ color: "#a09888" }}>RESEND_API_KEY</code> on the API).
+        Applications from the public Apply page. Shortlisted, Rejected, Accepted,
+        and Denied each send an email to the applicant when you confirm the change.
       </p>
+
+      {loadError ? (
+        <p className={styles.inlineError} style={{ marginBottom: "1rem" }}>
+          {loadError}
+        </p>
+      ) : null}
 
       <div className={styles.tableWrap}>
         <table className={styles.table}>

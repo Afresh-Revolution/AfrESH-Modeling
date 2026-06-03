@@ -55,12 +55,14 @@ function isYearRate(x: unknown): x is YearRate {
 export function parseSiteMetricsRow(row: Record<string, unknown>): SiteMetrics {
   let category_distribution: CategorySlice[] = DEFAULT_SITE_METRICS.category_distribution;
   const cd = row.category_distribution;
-  if (Array.isArray(cd) && cd.every(isCategorySlice)) {
+  if (Array.isArray(cd) && cd.length > 0 && cd.every(isCategorySlice)) {
     category_distribution = cd;
   } else if (typeof cd === "string") {
     try {
       const j = JSON.parse(cd) as unknown;
-      if (Array.isArray(j) && j.every(isCategorySlice)) category_distribution = j;
+      if (Array.isArray(j) && j.length > 0 && j.every(isCategorySlice)) {
+        category_distribution = j;
+      }
     } catch {
       /* keep default */
     }
@@ -68,12 +70,14 @@ export function parseSiteMetricsRow(row: Record<string, unknown>): SiteMetrics {
 
   let placement_by_year: YearRate[] = DEFAULT_SITE_METRICS.placement_by_year;
   const py = row.placement_by_year;
-  if (Array.isArray(py) && py.every(isYearRate)) {
+  if (Array.isArray(py) && py.length > 0 && py.every(isYearRate)) {
     placement_by_year = py;
   } else if (typeof py === "string") {
     try {
       const j = JSON.parse(py) as unknown;
-      if (Array.isArray(j) && j.every(isYearRate)) placement_by_year = j;
+      if (Array.isArray(j) && j.length > 0 && j.every(isYearRate)) {
+        placement_by_year = j;
+      }
     } catch {
       /* keep default */
     }

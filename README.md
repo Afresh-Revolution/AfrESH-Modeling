@@ -70,7 +70,7 @@ Reference spec: `onyxx-backend/.do/app.yaml`
 | `CLOUDINARY_UPLOAD_FOLDER` | No | Default `afresh` |
 | `PUBLIC_SITE_URL` | Recommended | Your public site URL (emails / logo links) |
 | `RESEND_API_KEY` | For emails | |
-| `RESEND_FROM` | For emails | e.g. `AfrESH Modeling <freshmodeling@gmail.com>` |
+| `RESEND_FROM` | For emails | e.g. `AfrESH Modeling <afreshmodeling@gmail.com>` |
 | `PORT` | Auto | DO sets `8080`; local dev uses `4000` in `.env` |
 
 \* `http://localhost:3000` and `https://afreshmodeling.com` are always allowed. You **must** add your deployed web URL, e.g.  

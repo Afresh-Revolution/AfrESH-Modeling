@@ -10,6 +10,18 @@ export function HeroCanvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+      });
+    } catch {
+      canvas.style.display = "none";
+      return;
+    }
+
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x050505, 0.018);
 
@@ -22,11 +34,6 @@ export function HeroCanvas() {
     camera.position.set(0, 4, 10);
     camera.lookAt(0, 2, -30);
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-    });
     renderer.setSize(canvas.clientWidth, canvas.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
