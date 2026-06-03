@@ -122,8 +122,7 @@ export async function adminLoginAction(
     });
   } catch {
     return {
-      error:
-        "Cannot reach the API right now. Start afreshmodeling-logic on port 4000 or update BASE_URL.",
+      error: "We can't sign you in right now. Please try again in a few minutes.",
     };
   }
 
@@ -160,12 +159,28 @@ export async function adminLogoutAction() {
   redirect("/admin/login");
 }
 
-export async function fetchApplicationsJson() {
-  const res = await adminFetch("/api/admin/applications");
-  if (!res.ok) throw new Error("We couldn't load submissions. Refresh the page and try again.");
-  return res.json() as Promise<{
-    applications: Record<string, unknown>[];
-  }>;
+export async function fetchApplicationsJson(): Promise<{
+  applications: Record<string, unknown>[];
+  loadError: string | null;
+}> {
+  try {
+    const res = await adminFetch("/api/admin/applications");
+    if (!res.ok) {
+      return {
+        applications: [],
+        loadError:
+          "We couldn't load submissions right now. Please sign out, sign in again, and refresh this page.",
+      };
+    }
+    const data = (await res.json()) as { applications?: Record<string, unknown>[] };
+    return { applications: data.applications ?? [], loadError: null };
+  } catch {
+    return {
+      applications: [],
+      loadError:
+        "We couldn't load submissions right now. Please check that the site API is running, then refresh.",
+    };
+  }
 }
 
 export async function fetchRosterJson() {
@@ -200,10 +215,9 @@ export async function fetchHireModelsJson() {
   }
 
   const detail = (await res.json().catch(() => ({}))) as { error?: string };
-  throw new Error(
-    detail.error ??
-      "We couldn't load hiring profiles. Add DATABASE_URL to .env or redeploy the API with hire-models support."
-  );
+    throw new Error(
+      detail.error ?? "We couldn't load hiring profiles. Please refresh and try again."
+    );
 }
 
 export async function fetchEditorialJson() {
@@ -226,12 +240,9 @@ export async function fetchSiteMetricsForAdmin() {
       /* keep truncated body */
     }
     throw new Error(
-      `We couldn't load site metrics (HTTP ${res.status}). ${detail}` +
-        (res.status === 404
-          ? " If the API is outdated, redeploy the backend so GET /api/admin/site-metrics exists."
-          : res.status === 503
-            ? " Set JWT_SECRET on the API host."
-            : "")
+      detail.trim()
+        ? `We couldn't load site metrics. ${detail}`
+        : "We couldn't load site metrics. Please refresh and try again."
     );
   }
   return res.json() as Promise<{ metrics: Record<string, unknown> }>;
@@ -289,7 +300,7 @@ export async function fetchLandingContentForAdmin(): Promise<{
     return {
       landing_content: { content: DEFAULT_LANDING_CONTENT },
       setupHint:
-        "Landing API is not deployed yet. Redeploy afreshmodeling-logic, or set DATABASE_URL in .env to save edits directly.",
+        "Landing content could not be loaded from the server. Saving may not appear on the live site until the connection is restored.",
     };
   }
 
@@ -321,9 +332,7 @@ export async function updateLandingContentAction(
     const j = (await res.json().catch(() => ({}))) as { error?: string };
     const msg = j.error ?? "Could not save landing content.";
     if (res.status === 404) {
-      throw new Error(
-        `${msg} Redeploy afreshmodeling-logic with landing-content routes, or set DATABASE_URL in .env.`
-      );
+      throw new Error(`${msg} Please contact your site administrator.`);
     }
     throw new Error(msg);
   }

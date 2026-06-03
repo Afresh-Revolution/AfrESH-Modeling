@@ -106,7 +106,10 @@ const COLORS = ["#c9a84c", "#e8d48b", "#8a6f2e", "#e85d75", "#6bb5ff", "#9b86bd"
 
 export function DataCharts({ metrics }: { metrics: SiteMetrics }) {
   const doughnutData: ChartData<"doughnut"> = useMemo(() => {
-    const slices = metrics.category_distribution;
+    const slices =
+      metrics.category_distribution.length > 0
+        ? metrics.category_distribution
+        : [{ label: "Editorial", value: 100 }];
     return {
       labels: slices.map((s) => s.label),
       datasets: [
@@ -123,7 +126,13 @@ export function DataCharts({ metrics }: { metrics: SiteMetrics }) {
   }, [metrics.category_distribution]);
 
   const barData: ChartData<"bar"> = useMemo(() => {
-    const rows = [...metrics.placement_by_year].sort((a, b) => a.year - b.year);
+    const rows = (
+      metrics.placement_by_year.length > 0
+        ? metrics.placement_by_year
+        : [{ year: new Date().getFullYear(), rate: 0 }]
+    )
+      .slice()
+      .sort((a, b) => a.year - b.year);
     return {
       labels: rows.map((r) => String(r.year)),
       datasets: [
