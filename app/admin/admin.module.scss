@@ -92,6 +92,49 @@
   scroll-margin-top: 5rem;
 }
 
+.applicationsToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.applicationsSearchWrap {
+  flex: 1 1 280px;
+  max-width: 480px;
+}
+
+.applicationsSearchLabel {
+  display: block;
+  font-size: 0.75rem;
+  color: #a09888;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.applicationsSearchInput {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  background: rgba(0, 0, 0, 0.35);
+  color: #f5f0e8;
+  font-size: 0.9rem;
+}
+
+.applicationsSearchInput::placeholder {
+  color: #6b6560;
+}
+
+.applicationsSearchMeta {
+  color: #a09888;
+  font-size: 0.85rem;
+  margin: -0.5rem 0 1rem;
+}
+
 .tableWrap {
   overflow-x: auto;
   border-radius: 10px;
