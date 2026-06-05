@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { updateSiteMetricsAction } from "../../actions";
 import styles from "../../admin.module.scss";
 import type { CategorySlice, SiteMetrics, YearRate } from "@/lib/siteMetrics";
@@ -298,14 +299,15 @@ export function MetricsEditor({ initial }: { initial: SiteMetrics }) {
           </p>
         ) : null}
 
-        <button
+        <SkeletonButton
           type="submit"
           className={`${styles.btn} ${styles.btnGold}`}
           style={{ marginTop: "1.5rem" }}
-          disabled={saving}
+          loading={saving}
+          loadingLabel="Saving metrics"
         >
-          {saving ? "Saving…" : "Save all metrics"}
-        </button>
+          Save all metrics
+        </SkeletonButton>
       </form>
     </main>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { useCallback, useRef, useState } from "react";
 
 function showToast(message: string, type: "success" | "error" = "success") {
@@ -289,14 +290,15 @@ export function ApplyForm() {
           I agree to the AfrESH Modeling terms of service and privacy policy. I confirm that all information provided is accurate.
         </label>
       </div>
-      <button
+      <SkeletonButton
         type="submit"
         className="btn-primary"
         style={{ width: "100%", padding: "1rem", fontSize: "1rem" }}
-        disabled={submitting}
+        loading={submitting}
+        loadingLabel="Submitting application"
       >
-        {submitting ? "Submitting…" : "Submit Application"}
-      </button>
+        Submit Application
+      </SkeletonButton>
     </form>
   );
 }

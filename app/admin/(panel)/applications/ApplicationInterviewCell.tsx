@@ -2,6 +2,7 @@
 
 import { updateApplicationInterview } from "../../actions";
 import styles from "../../admin.module.scss";
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { useEffect, useState, useTransition } from "react";
 
 function toDatetimeLocalValue(iso: string | null | undefined): string {
@@ -101,9 +102,14 @@ export function ApplicationInterviewCell({
             required
           />
           <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-            <button type="submit" className={`${styles.btn} ${styles.btnGold}`} disabled={pending}>
-              {pending ? "Saving…" : "Save"}
-            </button>
+            <SkeletonButton
+              type="submit"
+              className={`${styles.btn} ${styles.btnGold}`}
+              loading={pending}
+              loadingLabel="Saving interview time"
+            >
+              Save
+            </SkeletonButton>
             <button
               type="button"
               className={styles.btn}

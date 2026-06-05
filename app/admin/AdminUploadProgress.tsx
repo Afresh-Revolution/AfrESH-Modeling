@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonProgress } from "@/components/skeleton/Skeleton";
 import type { AdminUploadState } from "@/lib/adminMultipartUpload";
 import type { CSSProperties } from "react";
 import styles from "./admin.module.scss";
@@ -24,18 +25,11 @@ export function AdminUploadProgress({
   }
 
   return (
-    <div
+    <SkeletonProgress
+      percent={state.percent}
       className={[styles.progressWrap, className].filter(Boolean).join(" ")}
       style={style}
-      aria-live="polite"
-    >
-      <div className={styles.progressRow}>
-        <span className={styles.spinner} aria-hidden="true" />
-        <span style={{ fontSize: "0.8rem", color: "#a09888" }}>Uploading… {state.percent}%</span>
-      </div>
-      <div className={styles.progressTrack}>
-        <div className={styles.progressBar} style={{ width: `${state.percent}%` }} />
-      </div>
-    </div>
+      label="Uploading"
+    />
   );
 }

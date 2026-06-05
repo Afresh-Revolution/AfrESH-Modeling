@@ -1,6 +1,7 @@
 "use client";
 
 import { LogoSvg } from "@/components/LogoSvg";
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { adminLoginAction, type AdminLoginState } from "../actions";
 import styles from "../admin.module.scss";
 import Link from "next/link";
@@ -103,13 +104,14 @@ export default function AdminLoginPage() {
               </div>
             </div>
 
-            <button
+            <SkeletonButton
               type="submit"
               className={styles.loginSubmit}
-              disabled={pending}
+              loading={pending}
+              loadingLabel="Signing in"
             >
-              <span>{pending ? "Signing in…" : "Sign in"}</span>
-            </button>
+              Sign in
+            </SkeletonButton>
           </form>
         </div>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { updateLandingContentAction } from "../../actions";
 import styles from "../../admin.module.scss";
 import type { LandingContent } from "@/lib/landingContent";
@@ -162,14 +163,15 @@ export default function LandingContentEditor({
           </p>
         ) : null}
 
-        <button
+        <SkeletonButton
           type="submit"
           className={`${styles.btn} ${styles.btnGold}`}
           style={{ marginTop: "1.25rem" }}
-          disabled={saving}
+          loading={saving}
+          loadingLabel="Saving landing content"
         >
-          {saving ? "Saving..." : "Save landing content"}
-        </button>
+          Save landing content
+        </SkeletonButton>
       </form>
     </main>
   );

@@ -10,6 +10,7 @@ import { AdminMultiImageField } from "@/components/admin/AdminMultiImageField";
 import { mergeCloudinaryImagesFromForm } from "@/lib/adminCloudinaryImages";
 import { imageUrlsForRow } from "@/lib/imageUrls";
 import { emitContentUpdate } from "@/lib/contentSync";
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -291,14 +292,15 @@ function RowEditor({ item }: { item: HireModelItem }) {
         <AdminUploadProgress state={upload} />
       </div>
 
-      <button
+      <SkeletonButton
         type="submit"
-        disabled={saving}
         className={`${styles.btn} ${styles.btnGold}`}
         style={{ marginTop: "0.5rem" }}
+        loading={saving}
+        loadingLabel="Saving hiring profile"
       >
-        {saving ? "Saving…" : "Save"}
-      </button>
+        Save
+      </SkeletonButton>
     </form>
   );
 }
@@ -495,9 +497,14 @@ export default function HireModelsClient({
               />
             </div>
             <div>
-              <button type="submit" disabled={creating} className={`${styles.btn} ${styles.btnGold}`}>
-                {creating ? "Uploading…" : "Create"}
-              </button>
+              <SkeletonButton
+                type="submit"
+                className={`${styles.btn} ${styles.btnGold}`}
+                loading={creating}
+                loadingLabel="Creating hiring profile"
+              >
+                Create
+              </SkeletonButton>
             </div>
           </div>
 
@@ -559,10 +566,11 @@ export default function HireModelsClient({
                     <RowEditor item={item} />
                   </td>
                   <td>
-                    <button
+                    <SkeletonButton
                       type="button"
                       className={`${styles.btn} ${styles.btnDanger}`}
-                      disabled={deletingId === id}
+                      loading={deletingId === id}
+                      loadingLabel="Removing hiring profile"
                       onClick={async () => {
                         if (deletingId) return;
                         setDeletingId(id);
@@ -587,8 +595,8 @@ export default function HireModelsClient({
                         }
                       }}
                     >
-                      {deletingId === id ? "Removing…" : "Remove"}
-                    </button>
+                      Remove
+                    </SkeletonButton>
                   </td>
                 </tr>
               );

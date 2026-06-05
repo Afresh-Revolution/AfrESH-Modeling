@@ -6,6 +6,7 @@ import {
   type SetApplicationStatusResult,
 } from "../../actions";
 import styles from "../../admin.module.scss";
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 
 const STATUSES = [
@@ -244,9 +245,14 @@ export function ApplicationStatusSelect({
             >
               Cancel
             </button>
-            <button type="submit" className={`${styles.btn} ${styles.btnGold}`} disabled={pending}>
-              {pending ? "Saving…" : "Confirm and email"}
-            </button>
+            <SkeletonButton
+              type="submit"
+              className={`${styles.btn} ${styles.btnGold}`}
+              loading={pending}
+              loadingLabel="Saving status"
+            >
+              Confirm and email
+            </SkeletonButton>
           </div>
         </form>
       </dialog>
