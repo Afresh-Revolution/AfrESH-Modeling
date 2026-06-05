@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { useEffect, useId, useRef, type ReactNode } from "react";
 import styles from "../admin.module.scss";
 
@@ -81,15 +82,16 @@ export function AdminConfirmDialog({
         >
           {cancelLabel}
         </button>
-        <button
+        <SkeletonButton
           type="button"
           className={`${styles.btn} ${variant === "danger" ? styles.btnDanger : styles.btnGold}`}
           onClick={onConfirm}
-          disabled={pending}
+          loading={pending}
+          loadingLabel="Please wait"
           autoFocus
         >
-          {pending ? "Please wait…" : confirmLabel}
-        </button>
+          {confirmLabel}
+        </SkeletonButton>
       </div>
     </dialog>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { useId, useRef, useState, useTransition } from "react";
 import { deleteApplication } from "../../actions";
 import styles from "../../admin.module.scss";
@@ -103,15 +104,16 @@ export function ApplicationDeleteButton({
           >
             Cancel
           </button>
-          <button
+          <SkeletonButton
             type="button"
             className={`${styles.btn} ${styles.btnDanger}`}
             onClick={confirmDelete}
-            disabled={pending}
+            loading={pending}
+            loadingLabel="Deleting application"
             autoFocus
           >
-            {pending ? "Deleting…" : "Delete"}
-          </button>
+            Delete
+          </SkeletonButton>
         </div>
       </dialog>
     </>

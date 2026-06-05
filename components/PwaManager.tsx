@@ -1,12 +1,13 @@
 "use client";
 
+import { SkeletonProgress } from "@/components/skeleton/Skeleton";
 import { useEffect, useState } from "react";
 
 const SW_URL = "/sw.js";
 
 export function PwaManager() {
   const [updateState, setUpdateState] = useState<{
-    message: string;
+    phase: "installing" | "reloading";
     percent: number;
   } | null>(null);
 
@@ -32,7 +33,7 @@ export function PwaManager() {
     let refreshing = false;
 
     const startInstallingProgress = () => {
-      setUpdateState({ message: "Installing latest update...", percent: 15 });
+      setUpdateState({ phase: "installing", percent: 15 });
       if (progressTimer) window.clearInterval(progressTimer);
       progressTimer = window.setInterval(() => {
         setUpdateState((prev) => {
@@ -72,7 +73,7 @@ export function PwaManager() {
       if (refreshing) return;
       refreshing = true;
       if (progressTimer) window.clearInterval(progressTimer);
-      setUpdateState({ message: "Update installed. Reloading...", percent: 100 });
+      setUpdateState({ phase: "reloading", percent: 100 });
       window.setTimeout(() => window.location.reload(), 1200);
     };
 
@@ -87,17 +88,12 @@ export function PwaManager() {
 
   if (!updateState) return null;
 
+  const label =
+    updateState.phase === "reloading" ? "Applying update" : "Installing update";
+
   return (
-    <div className="pwa-update-card" role="status" aria-live="polite">
-      <div className="pwa-update-row">
-        <span className="pwa-update-spinner" aria-hidden="true" />
-        <span className="pwa-update-text">
-          {updateState.message} {updateState.percent}%
-        </span>
-      </div>
-      <div className="pwa-update-track">
-        <div className="pwa-update-bar" style={{ width: `${updateState.percent}%` }} />
-      </div>
+    <div className="pwa-update-card" role="status" aria-live="polite" aria-label={label}>
+      <SkeletonProgress percent={updateState.percent} label={label} />
     </div>
   );
 }

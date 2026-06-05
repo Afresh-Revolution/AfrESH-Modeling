@@ -7,6 +7,7 @@ import {
   xhrMultipartWithProgress,
 } from "@/lib/adminMultipartUpload";
 import { emitContentUpdate } from "@/lib/contentSync";
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -271,14 +272,15 @@ function RowEditor({ item }: { item: EditorialItem }) {
         <AdminUploadProgress state={upload} />
       </div>
 
-      <button
+      <SkeletonButton
         type="submit"
-        disabled={saving}
         className={`${styles.btn} ${styles.btnGold}`}
         style={{ marginTop: "0.5rem" }}
+        loading={saving}
+        loadingLabel="Saving campaign"
       >
-        {saving ? "Saving…" : "Save"}
-      </button>
+        Save
+      </SkeletonButton>
     </form>
   );
 }
@@ -466,9 +468,14 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
               />
             </div>
             <div>
-              <button type="submit" disabled={creating} className={`${styles.btn} ${styles.btnGold}`}>
-                {creating ? "Uploading…" : "Create"}
-              </button>
+              <SkeletonButton
+                type="submit"
+                className={`${styles.btn} ${styles.btnGold}`}
+                loading={creating}
+                loadingLabel="Creating campaign"
+              >
+                Create
+              </SkeletonButton>
             </div>
           </div>
 
@@ -524,10 +531,11 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                     <RowEditor item={item} />
                   </td>
                   <td>
-                    <button
+                    <SkeletonButton
                       type="button"
                       className={`${styles.btn} ${styles.btnDanger}`}
-                      disabled={deletingId === id}
+                      loading={deletingId === id}
+                      loadingLabel="Removing campaign"
                       onClick={async () => {
                         if (deletingId) return;
                         setDeletingId(id);
@@ -552,8 +560,8 @@ export default function EditorialClient({ initialEditorial }: { initialEditorial
                         }
                       }}
                     >
-                      {deletingId === id ? "Removing…" : "Remove"}
-                    </button>
+                      Remove
+                    </SkeletonButton>
                   </td>
                 </tr>
               );

@@ -7,6 +7,7 @@ import {
   xhrMultipartWithProgress,
 } from "@/lib/adminMultipartUpload";
 import { AdminMultiImageField } from "@/components/admin/AdminMultiImageField";
+import { SkeletonButton } from "@/components/skeleton/Skeleton";
 import { imageUrlsForRow } from "@/lib/imageUrls";
 import { emitContentUpdate } from "@/lib/contentSync";
 import Image from "next/image";
@@ -86,14 +87,15 @@ function RowUpdateForm({ m }: { m: RosterRow }) {
         </div>
         <AdminMultiImageField row={m} inputId={`roster-images-${id}`} label="Add more photos" />
       </div>
-      <button
+      <SkeletonButton
         type="submit"
-        disabled={saving}
         className={`${styles.btn} ${styles.btnGold}`}
         style={{ marginTop: "0.5rem" }}
+        loading={saving}
+        loadingLabel="Saving roster entry"
       >
-        {saving ? "Saving…" : "Save"}
-      </button>
+        Save
+      </SkeletonButton>
       <AdminUploadProgress state={upload} style={{ marginTop: "0.5rem" }} />
     </form>
   );
@@ -216,9 +218,14 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
               <p className={styles.fieldHint}>Select one or more images.</p>
             </div>
             <div>
-              <button type="submit" disabled={creating} className={`${styles.btn} ${styles.btnGold}`}>
-                {creating ? "Creating…" : "Create"}
-              </button>
+              <SkeletonButton
+                type="submit"
+                className={`${styles.btn} ${styles.btnGold}`}
+                loading={creating}
+                loadingLabel="Creating roster entry"
+              >
+                Create
+              </SkeletonButton>
             </div>
           </div>
           <AdminUploadProgress state={createUpload} style={{ marginTop: "0.75rem" }} />
@@ -269,10 +276,11 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
                     <RowUpdateForm m={m} />
                   </td>
                   <td>
-                    <button
+                    <SkeletonButton
                       type="button"
                       className={`${styles.btn} ${styles.btnDanger}`}
-                      disabled={deletingId === id}
+                      loading={deletingId === id}
+                      loadingLabel="Removing roster entry"
                       onClick={async () => {
                         if (deletingId) return;
                         setDeletingId(id);
@@ -294,8 +302,8 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
                         }
                       }}
                     >
-                      {deletingId === id ? "Removing…" : "Remove"}
-                    </button>
+                      Remove
+                    </SkeletonButton>
                   </td>
                 </tr>
               );
