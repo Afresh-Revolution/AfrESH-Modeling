@@ -34,7 +34,8 @@
     "react-dom": "^19.0.0",
     "sass": "^1.85.1",
     "three": "^0.174.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
