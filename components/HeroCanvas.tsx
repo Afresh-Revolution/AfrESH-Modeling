@@ -1,14 +1,16 @@
 "use client";
 
 import * as THREE from "three";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 
 export function HeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    canvas.style.opacity = "1";
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -232,17 +234,29 @@ export function HeroCanvas() {
     const onResize = () => {
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
-      if (h < 1) return;
+      if (w < 1 || h < 1) return;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
+      renderer.render(scene, camera);
     };
     window.addEventListener("resize", onResize);
+    onResize();
+
+    let resizeObserver: ResizeObserver | undefined;
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => onResize());
+      resizeObserver.observe(canvas);
+    }
 
     const onScroll = () => {
       const heroEl = document.getElementById("hero");
       if (!heroEl) return;
       const scrollY = window.scrollY;
+      if (scrollY <= 0) {
+        canvas.style.opacity = "1";
+        return;
+      }
       const heroH = heroEl.offsetHeight;
       const opacity = Math.max(0, 1 - scrollY / (heroH * 0.6));
       canvas.style.opacity = String(opacity);
@@ -250,11 +264,21 @@ export function HeroCanvas() {
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
 
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (!event.persisted) return;
+      canvas.style.opacity = "1";
+      onResize();
+      onScroll();
+    };
+    window.addEventListener("pageshow", onPageShow);
+
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      resizeObserver?.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pageshow", onPageShow);
       renderer.dispose();
       scene.clear();
       torusGeom.dispose();
