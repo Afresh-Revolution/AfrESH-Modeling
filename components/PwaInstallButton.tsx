@@ -1,5 +1,6 @@
 "use client";
 
+import { PWA_DISPLAY_NAME } from "@/lib/brand";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -122,7 +123,7 @@ export function PwaInstallButton() {
             >
               <i className="fas fa-xmark" aria-hidden />
             </button>
-            <h3 id="install-help-title">Install AfrESH Modeling App</h3>
+            <h3 id="install-help-title">Install {PWA_DISPLAY_NAME}</h3>
             <p>{helpText}</p>
             <div className="footer-modal-actions">
               <button type="button" className="footer-btn footer-btn-outline" onClick={() => setShowHelp(false)}>
