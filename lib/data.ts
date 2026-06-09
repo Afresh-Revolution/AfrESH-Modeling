@@ -15,6 +15,7 @@ import {
 import { readLocalLandingContentMirror } from "./localLandingContentStore";
 import { createSupabaseAnon } from "./supabase";
 import { imageUrlsForRow, primaryImageUrl } from "@/lib/imageUrls";
+import { ensureRosterSocialUrlColumn, rosterReturnColumns } from "@/lib/rosterDb";
 import type { EditorialItem, HireModel, RosterModel } from "./types";
 
 function backendBase(): string | null {
@@ -83,6 +84,16 @@ function normalizeRoster(rows: unknown[]): RosterModel[] {
     const name = typeof r.name === "string" ? r.name : "";
     const category = typeof r.category === "string" ? r.category : "";
     if (!name || !category || !image) continue;
+    const socialRaw =
+      typeof r.social_url === "string"
+        ? r.social_url
+        : typeof r.socialUrl === "string"
+          ? r.socialUrl
+          : null;
+    const social_url =
+      typeof socialRaw === "string" && socialRaw.trim().length
+        ? socialRaw.trim()
+        : null;
     out.push({
       id: typeof r.id === "string" ? r.id : typeof r.id === "number" ? String(r.id) : undefined,
       name,
@@ -90,6 +101,7 @@ function normalizeRoster(rows: unknown[]): RosterModel[] {
       image_url: image,
       image_urls,
       sort_order: typeof r.sort_order === "number" ? r.sort_order : undefined,
+      social_url,
     });
   }
   return out;
@@ -196,18 +208,24 @@ export async function fetchRoster(): Promise<RosterModel[]> {
   const pool = getPgPool();
   if (pool) {
     try {
+      await ensureRosterSocialUrlColumn(pool);
       const { rows } = await pool.query<RosterModel & { image_urls?: unknown }>(
-        `SELECT id::text, name, category, image_url, image_urls, sort_order
+        `SELECT ${rosterReturnColumns}
          FROM roster
          ORDER BY sort_order ASC NULLS LAST, name ASC`
       );
       if (rows.length) {
         return rows.map((r) => {
           const image_urls = imageUrlsForRow(r);
+          const social_url =
+            typeof r.social_url === "string" && r.social_url.trim().length
+              ? r.social_url.trim()
+              : null;
           return {
             ...r,
             image_url: primaryImageUrl(image_urls, r.image_url),
             image_urls,
+            social_url,
           };
         });
       }
@@ -220,16 +238,21 @@ export async function fetchRoster(): Promise<RosterModel[]> {
   if (supabase) {
     const { data, error } = await supabase
       .from("roster")
-      .select("id,name,category,image_url,image_urls,sort_order")
+      .select("id,name,category,image_url,image_urls,social_url,sort_order")
       .order("sort_order", { ascending: true });
 
     if (!error && data?.length) {
       return (data as (RosterModel & { image_urls?: unknown })[]).map((r) => {
         const image_urls = imageUrlsForRow(r);
+        const social_url =
+          typeof r.social_url === "string" && r.social_url.trim().length
+            ? r.social_url.trim()
+            : null;
         return {
           ...r,
           image_url: primaryImageUrl(image_urls, r.image_url),
           image_urls,
+          social_url,
         };
       });
     }

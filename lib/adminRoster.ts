@@ -1,5 +1,6 @@
 import { getPgPool } from "@/lib/db/postgres";
 import { imageUrlsForRow, parseImageUrls, toDbImageFields } from "@/lib/imageUrls";
+import { ensureRosterSocialUrlColumn, rosterReturnColumns } from "@/lib/rosterDb";
 import { v2 as cloudinary } from "cloudinary";
 
 const ROSTER_FOLDER = `${process.env.CLOUDINARY_UPLOAD_FOLDER ?? "afresh"}/roster`;
@@ -10,6 +11,7 @@ export type RosterAdminRow = {
   category: string;
   image_url: string;
   image_urls: string[];
+  social_url?: string | null;
   sort_order: number;
   created_at?: string;
   updated_at?: string;
@@ -48,6 +50,22 @@ function isHttpUrl(url: string): boolean {
   }
 }
 
+function normalizeSocialUrl(raw: string | undefined): string | null | undefined {
+  if (raw === undefined) return undefined;
+  let trimmed = String(raw).trim();
+  if (!trimmed) return null;
+  if (!isHttpUrl(trimmed)) {
+    trimmed = trimmed.replace(/^\/\//, "");
+    if (/^[\w.-]+\.[a-z]{2,}/i.test(trimmed) || trimmed.startsWith("www.")) {
+      trimmed = `https://${trimmed}`;
+    }
+  }
+  if (!isHttpUrl(trimmed)) {
+    throw new Error("Social link must be a valid URL (e.g. https://instagram.com/username)");
+  }
+  return trimmed;
+}
+
 function parseFormFields(formData: FormData): Record<string, string> {
   const fields: Record<string, string> = {};
   for (const [key, value] of formData.entries()) {
@@ -80,8 +98,9 @@ export async function uploadRosterImageFile(file: File): Promise<string> {
 
 export async function listRosterAdmin(): Promise<RosterAdminRow[]> {
   const pool = poolOrThrow();
+  await ensureRosterSocialUrlColumn(pool);
   const { rows } = await pool.query<RosterAdminRow & { image_urls?: unknown }>(
-    `SELECT id::text, name, category, image_url, image_urls, sort_order, created_at, updated_at
+    `SELECT ${rosterReturnColumns}, created_at, updated_at
      FROM roster
      ORDER BY sort_order ASC NULLS LAST, name ASC`
   );
@@ -100,6 +119,7 @@ export async function createRosterFromForm(formData: FormData) {
   const name = String(fields.name ?? "").trim();
   const category = String(fields.category ?? "").trim();
   const sort_order = Number(fields.sort_order ?? 0) || 0;
+  const social_url = normalizeSocialUrl(fields.social_url) ?? null;
 
   if (!name || !category) throw new Error("name and category required");
 
@@ -118,11 +138,12 @@ export async function createRosterFromForm(formData: FormData) {
   if (!image_url) throw new Error("At least one image is required");
 
   const pool = poolOrThrow();
+  await ensureRosterSocialUrlColumn(pool);
   const { rows } = await pool.query<RosterAdminRow>(
-    `INSERT INTO roster (name, category, image_url, image_urls, sort_order)
-     VALUES ($1, $2, $3, $4::jsonb, $5)
-     RETURNING id::text, name, category, image_url, image_urls, sort_order`,
-    [name, category, image_url, JSON.stringify(image_urls), sort_order]
+    `INSERT INTO roster (name, category, image_url, image_urls, social_url, sort_order)
+     VALUES ($1, $2, $3, $4::jsonb, $5, $6)
+     RETURNING ${rosterReturnColumns}`,
+    [name, category, image_url, JSON.stringify(image_urls), social_url, sort_order]
   );
   const row = rows[0];
   return { ...row, image_urls: imageUrlsForRow(row) };
@@ -149,14 +170,20 @@ export async function updateRosterFromForm(id: string, formData: FormData) {
       vals.push(n);
     }
   }
+  if (fields.social_url !== undefined) {
+    sets.push(`social_url = $${i++}`);
+    vals.push(normalizeSocialUrl(fields.social_url) ?? null);
+  }
 
   const hasImageUpdate =
     fields.image_urls !== undefined ||
     fields.image_url !== undefined ||
     getImageFiles(formData).length > 0;
 
+  const pool = poolOrThrow();
+  await ensureRosterSocialUrlColumn(pool);
+
   if (hasImageUpdate) {
-    const pool = poolOrThrow();
     const existing = await pool.query<{ image_url: string; image_urls: unknown }>(
       `SELECT image_url, image_urls FROM roster WHERE id = $1::uuid`,
       [id]
@@ -192,10 +219,9 @@ export async function updateRosterFromForm(id: string, formData: FormData) {
   sets.push("updated_at = now()");
   vals.push(id);
 
-  const pool = poolOrThrow();
   const { rowCount, rows } = await pool.query<RosterAdminRow>(
     `UPDATE roster SET ${sets.join(", ")} WHERE id = $${vals.length}::uuid
-     RETURNING id::text, name, category, image_url, image_urls, sort_order`,
+     RETURNING ${rosterReturnColumns}`,
     vals
   );
   if (!rowCount) throw new Error("Not found");
