@@ -565,8 +565,6 @@ img {
   overflow: hidden;
 }
 .model-card-img {
-  width: 100%;
-  height: 380px;
   object-fit: cover;
   transition: transform 0.6s ease;
 }
@@ -624,6 +622,9 @@ img {
 .model-card-social-link i {
   font-size: 1rem;
   color: var(--gold);
+}
+.model-card-social-link[data-platform="tiktok"] i {
+  color: #fff;
 }
 .model-card-social-link:hover i {
   color: var(--bg);
@@ -1860,7 +1861,7 @@ img {
   .model-card {
     flex: 0 0 240px;
   }
-  .model-card-img {
+  .model-card-media {
     height: 320px;
   }
 }

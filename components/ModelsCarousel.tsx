@@ -122,9 +122,8 @@ export function ModelsCarousel({ models }: { models: RosterModel[] }) {
                   <RotatingGalleryImage
                     images={images}
                     alt={m.name}
-                    width={400}
-                    height={550}
-                    sizes="280px"
+                    fill
+                    sizes="(max-width: 768px) 240px, 280px"
                     className="model-card-img"
                   />
                   <div className="model-card-overlay">
@@ -135,6 +134,7 @@ export function ModelsCarousel({ models }: { models: RosterModel[] }) {
                 {socialUrl && socialMeta ? (
                   <a
                     className="model-card-social-link"
+                    data-platform={socialMeta.platform}
                     href={socialUrl}
                     target="_blank"
                     rel="noopener noreferrer"
