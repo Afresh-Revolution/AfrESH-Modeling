@@ -5,6 +5,8 @@ export type RosterModel = {
   image_url: string;
   image_urls?: string[];
   sort_order?: number;
+  /** Optional profile link (Instagram, etc.) shown on the public roster card. */
+  social_url?: string | null;
 };
 
 export type HireModel = {

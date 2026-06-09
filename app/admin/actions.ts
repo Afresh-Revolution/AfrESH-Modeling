@@ -183,12 +183,42 @@ export async function fetchApplicationsJson(): Promise<{
   }
 }
 
-export async function fetchRosterJson() {
+export async function fetchRosterJson(): Promise<{
+  roster: Record<string, unknown>[];
+  loadError?: string | null;
+}> {
+  await verifyAdminSession();
+
+  const { rosterStorageReady, listRosterAdmin } = await import("@/lib/adminRoster");
+
+  if (rosterStorageReady()) {
+    try {
+      const roster = await listRosterAdmin();
+      return { roster: roster as Record<string, unknown>[] };
+    } catch (e) {
+      console.error("[fetchRosterJson]", e);
+      return {
+        roster: [],
+        loadError:
+          e instanceof Error
+            ? e.message
+            : "We couldn't load the roster from the database. Check DATABASE_URL and try again.",
+      };
+    }
+  }
+
   const res = await adminFetch("/api/admin/roster");
-  if (!res.ok) throw new Error("We couldn't load the roster. Refresh the page and try again.");
-  return res.json() as Promise<{
-    roster: Record<string, unknown>[];
-  }>;
+  if (res.ok) {
+    const data = (await res.json()) as { roster: Record<string, unknown>[] };
+    return { roster: data.roster ?? [] };
+  }
+
+  const detail = (await res.json().catch(() => ({}))) as { error?: string };
+  return {
+    roster: [],
+    loadError:
+      detail.error ?? "We couldn't load the roster. Refresh the page and try again.",
+  };
 }
 
 export async function fetchHireModelsJson() {

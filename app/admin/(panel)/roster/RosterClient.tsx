@@ -85,6 +85,24 @@ function RowUpdateForm({ m }: { m: RosterRow }) {
             defaultValue={Number(m.sort_order ?? 0)}
           />
         </div>
+        <div style={{ gridColumn: "1 / -1" }}>
+          <label className={styles.label}>Social media link</label>
+          <input
+            name="social_url"
+            type="text"
+            className={styles.input}
+            defaultValue={
+              typeof m.social_url === "string" && m.social_url.trim().length
+                ? m.social_url
+                : ""
+            }
+            placeholder="https://instagram.com/username"
+            inputMode="url"
+          />
+          <p className={styles.fieldHint}>
+            Optional. Shown under this model&apos;s card on the public site. Leave blank to hide.
+          </p>
+        </div>
         <AdminMultiImageField row={m} inputId={`roster-images-${id}`} label="Add more photos" />
       </div>
       <SkeletonButton
@@ -101,7 +119,13 @@ function RowUpdateForm({ m }: { m: RosterRow }) {
   );
 }
 
-export default function RosterClient({ initialRoster }: { initialRoster: RosterRow[] }) {
+export default function RosterClient({
+  initialRoster,
+  loadError,
+}: {
+  initialRoster: RosterRow[];
+  loadError?: string | null;
+}) {
   const router = useRouter();
   const roster = useMemo(() => initialRoster ?? [], [initialRoster]);
   const [createUpload, setCreateUpload] = useState<AdminUploadState>({ kind: "idle" });
@@ -116,6 +140,12 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
         Upload one or more photos per talent. On the public site, multiple photos rotate every 3
         seconds; tap any photo for fullscreen.
       </p>
+
+      {loadError ? (
+        <p className={styles.inlineError} style={{ marginBottom: "1rem" }}>
+          {loadError}
+        </p>
+      ) : null}
 
       {deleteError ? (
         <p className={styles.inlineError} style={{ marginBottom: "1rem" }}>
@@ -201,6 +231,20 @@ export default function RosterClient({ initialRoster }: { initialRoster: RosterR
                 className={styles.input}
                 defaultValue={0}
               />
+            </div>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label className={styles.label} htmlFor="new-social">
+                Social media link
+              </label>
+              <input
+                id="new-social"
+                name="social_url"
+                type="text"
+                className={styles.input}
+                placeholder="https://instagram.com/username"
+                inputMode="url"
+              />
+              <p className={styles.fieldHint}>Optional. Shown under the model card on the homepage.</p>
             </div>
             <div>
               <label className={styles.label} htmlFor="new-images">

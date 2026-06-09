@@ -2,6 +2,7 @@
 
 import type { RosterModel } from "@/lib/types";
 import { imageUrlsForRow } from "@/lib/imageUrls";
+import { rosterSocialLinkMeta } from "@/lib/socialUrl";
 import { RotatingGalleryImage } from "@/components/RotatingGalleryImage";
 import {
   useCallback,
@@ -107,16 +108,13 @@ export function ModelsCarousel({ models }: { models: RosterModel[] }) {
         >
           {models.map((m) => {
             const images = imageUrlsForRow(m);
+            const socialUrl =
+              typeof m.social_url === "string" && m.social_url.trim().length
+                ? m.social_url.trim()
+                : null;
+            const socialMeta = socialUrl ? rosterSocialLinkMeta(socialUrl) : null;
             return (
               <div className="model-card" key={`${m.name}-${m.id ?? m.image_url}`}>
-                <div className="model-card-socials">
-                  <a href="#" aria-label="Instagram">
-                    <i className="fab fa-instagram" aria-hidden />
-                  </a>
-                  <a href="#" aria-label="Portfolio">
-                    <i className="fas fa-external-link-alt" aria-hidden />
-                  </a>
-                </div>
                 <div
                   className="model-card-media"
                   onPointerDown={(e) => e.stopPropagation()}
@@ -129,11 +127,25 @@ export function ModelsCarousel({ models }: { models: RosterModel[] }) {
                     sizes="280px"
                     className="model-card-img"
                   />
+                  <div className="model-card-overlay">
+                    <div className="model-card-name">{m.name}</div>
+                    <div className="model-card-category">{m.category}</div>
+                  </div>
                 </div>
-                <div className="model-card-overlay">
-                  <div className="model-card-name">{m.name}</div>
-                  <div className="model-card-category">{m.category}</div>
-                </div>
+                {socialUrl && socialMeta ? (
+                  <a
+                    className="model-card-social-link"
+                    href={socialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${m.name} on ${socialMeta.label}`}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <i className={socialMeta.iconClass} aria-hidden />
+                    <span>{socialMeta.label}</span>
+                  </a>
+                ) : null}
               </div>
             );
           })}
