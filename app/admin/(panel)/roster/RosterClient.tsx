@@ -96,11 +96,12 @@ function RowUpdateForm({ m }: { m: RosterRow }) {
                 ? m.social_url
                 : ""
             }
-            placeholder="https://instagram.com/username"
+            placeholder="https://instagram.com/@username"
             inputMode="url"
           />
           <p className={styles.fieldHint}>
-            Optional. Shown under this model&apos;s card on the public site. Leave blank to hide.
+            Optional. The button icon and label (Instagram, TikTok, YouTube, etc.) are chosen
+            automatically from the link. Leave blank to hide.
           </p>
         </div>
         <AdminMultiImageField row={m} inputId={`roster-images-${id}`} label="Add more photos" />
@@ -241,10 +242,12 @@ export default function RosterClient({
                 name="social_url"
                 type="text"
                 className={styles.input}
-                placeholder="https://instagram.com/username"
+                placeholder="https://tiktok.com/@username"
                 inputMode="url"
               />
-              <p className={styles.fieldHint}>Optional. Shown under the model card on the homepage.</p>
+              <p className={styles.fieldHint}>
+                Optional. The button icon and label are chosen automatically from the link.
+              </p>
             </div>
             <div>
               <label className={styles.label} htmlFor="new-images">
